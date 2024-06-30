@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd ">
+	<changeSet author="dm-comp" id="Initial-Scheme" runInTransaction="true" failOnError="true">
+		<createTable tableName="TODO">
+			<column name="TASK" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="LONGVARCHAR" />
+			<column name="TITLE" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ID" tableName="TODO" />
+		<addAutoIncrement columnDataType="BIGINT" columnName="ID" startWith="1" tableName="TODO" />
+		<createTable tableName="PROJECT">
+			<column name="DESCRIPTION" type="LONGVARCHAR" />
+			<column name="TITLE" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="USER" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ID" tableName="PROJECT" />
+		<addAutoIncrement columnDataType="BIGINT" columnName="ID" startWith="1" tableName="PROJECT" />
+		<createTable tableName="TASK">
+			<column name="PROJECT" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="LONGVARCHAR" />
+			<column name="TASK_STATUS" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="TITLE" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="USER" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ID" tableName="TASK" />
+		<addAutoIncrement columnDataType="BIGINT" columnName="ID" startWith="1" tableName="TASK" />
+		<createTable tableName="USER">
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TOKEN" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+			<column name="GLOBAL_ID" type="VARCHAR(50)" />
+			<column name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ID" tableName="USER" />
+		<addAutoIncrement columnDataType="BIGINT" columnName="ID" startWith="1" tableName="USER" />
+		<addForeignKeyConstraint baseColumnNames="TASK" baseTableName="TODO" constraintName="FK_TODO_TASK_TO_TASK" referencedColumnNames="ID" referencedTableName="TASK" />
+		<addForeignKeyConstraint baseColumnNames="USER" baseTableName="PROJECT" constraintName="FK_PROJECT_USER_TO_USER" referencedColumnNames="ID" referencedTableName="USER" />
+		<addForeignKeyConstraint baseColumnNames="PROJECT" baseTableName="TASK" constraintName="FK_TASK_PROJECT_TO_PROJECT" referencedColumnNames="ID" referencedTableName="PROJECT" />
+		<addForeignKeyConstraint baseColumnNames="USER" baseTableName="TASK" constraintName="FK_TASK_USER_TO_USER" referencedColumnNames="ID" referencedTableName="USER" />
+	</changeSet>
+	<changeSet author="dm-comp" id="Add-Field-DEFAULT_USER-to-Table-USER" runInTransaction="true" failOnError="true">
+		<addColumn tableName="USER">
+			<column name="DEFAULT_USER" type="BOOLEAN" defaultValue="false">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet author="dm-comp" id="Add-the-Default-User" runInTransaction="true" failOnError="true">
+		<insert tableName="USER">
+			<column name="DEFAULT_USER" valueBoolean="true" />
+			<column name="NAME" value="Default User" />
+			<column name="TOKEN" value="DU" />
+		</insert>
+	</changeSet>
+	<changeSet author="dm-comp" id="Set-Field-TASK-in-Table-TODO-to-Nullable" runInTransaction="true" failOnError="true">
+		<dropNotNullConstraint columnName="TASK" tableName="TODO" columnDataType="BIGINT" />
+	</changeSet>
+</databaseChangeLog>
