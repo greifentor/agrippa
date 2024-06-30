@@ -101,6 +101,8 @@ public class TodoListDetailsLayout extends VerticalLayout {
 			grid.setItems(model.getTodos());
 		}
 		grid.setWidthFull();
+		setMargin(false);
+		setPadding(false);
 		add(buttons, grid);
 	}
 
