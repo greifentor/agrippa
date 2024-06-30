@@ -3,11 +3,13 @@ package de.ollie.agrippa.gui.vaadin.masterdata.dialog;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
 import de.ollie.agrippa.gui.vaadin.component.Button;
 import de.ollie.agrippa.core.model.Todo;
+import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
 import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
@@ -36,6 +38,7 @@ public class TodoDetailsDialog extends Dialog {
 	private Button buttonCancel;
 	private Button buttonSave;
 	private TextField textFieldTitle;
+	private ComboBox<TodoStatus> comboBoxStatus;
 	private TextArea textAreaDescription;
 	private VerticalLayout mainLayout;
 
@@ -52,6 +55,7 @@ public class TodoDetailsDialog extends Dialog {
 		this.session = session;
 		if (model != null) {
 			this.model.setTitle(model.getTitle());
+			this.model.setStatus(model.getStatus());
 			this.model.setDescription(model.getDescription());
 		}
 		mainLayout = new VerticalLayout();
@@ -72,6 +76,11 @@ public class TodoDetailsDialog extends Dialog {
 			model.setTitle(event.getValue());
 			updateSaveButton();
 		});
+		comboBoxStatus = componentFactory.createComboBox("TodoDetailsLayout.field.status.label", model.getStatus(), TodoStatus.values(), componentFactory.getTodoStatusItemLabelGenerator(), session);
+		comboBoxStatus.addValueChangeListener(event -> {
+			model.setStatus(event.getValue());
+			updateSaveButton();
+		});
 		textAreaDescription = componentFactory.createTextArea("TodoDetailsLayout.field.description.label", model.getDescription(), session);
 		textAreaDescription.addValueChangeListener(event -> {
 			model.setDescription(event.getValue());
@@ -79,13 +88,15 @@ public class TodoDetailsDialog extends Dialog {
 		});
 		mainLayout.add(
 				textFieldTitle,
+				comboBoxStatus,
 				textAreaDescription
 		);
 	}
 
 	private void updateSaveButton() {
 		setButtonEnabled(buttonSave,
-				(textFieldTitle.getValue() != null)
+				(textFieldTitle.getValue() != null) &&
+				(comboBoxStatus.getValue() != null)
 		);
 	}
 

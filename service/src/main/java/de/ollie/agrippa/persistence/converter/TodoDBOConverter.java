@@ -21,6 +21,8 @@ import de.ollie.agrippa.core.model.Todo;
 @RequiredArgsConstructor
 public class TodoDBOConverter implements ToModelConverter<Todo, TodoDBO> {
 
+	private final TodoStatusDBOConverter todoStatusDBOConverter;
+
 	public TodoDBO toDBO(Todo model) {
 		if (model == null) {
 			return null;
@@ -28,6 +30,7 @@ public class TodoDBOConverter implements ToModelConverter<Todo, TodoDBO> {
 		return new TodoDBO()
 				.setId(model.getId())
 				.setDescription(model.getDescription())
+				.setStatus(todoStatusDBOConverter.toDBO(model.getStatus()))
 				.setTitle(model.getTitle());
 	}
 
@@ -46,6 +49,7 @@ public class TodoDBOConverter implements ToModelConverter<Todo, TodoDBO> {
 		return new Todo()
 				.setId(dbo.getId())
 				.setDescription(dbo.getDescription())
+				.setStatus(todoStatusDBOConverter.toModel(dbo.getStatus()))
 				.setTitle(dbo.getTitle());
 	}
 

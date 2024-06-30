@@ -22,6 +22,7 @@ import com.vaadin.flow.router.QueryParameters;
 import de.ollie.agrippa.core.model.AdditionalDisplayMode;
 import de.ollie.agrippa.core.model.Period;
 import de.ollie.agrippa.core.model.TaskStatus;
+import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.model.Project;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.Todo;
@@ -55,6 +56,8 @@ public class ComponentFactory {
 	private ItemLabelGenerator<Period> periodItemLabelGenerator;
 	@Autowired(required = false)
 	private ItemLabelGenerator<TaskStatus> taskStatusItemLabelGenerator;
+	@Autowired(required = false)
+	private ItemLabelGenerator<TodoStatus> todoStatusItemLabelGenerator;
 
 	@Autowired(required = false)
 	private ItemLabelGenerator<Project> projectItemLabelGenerator;

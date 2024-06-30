@@ -1,14 +1,14 @@
-package de.ollie.agrippa.core.model;
+package de.ollie.agrippa.persistence.entity;
 
 import lombok.Generated;
 
 /**
- * An enum for taskstatuss.
+ * A DBO enum for todostatuss.
  *
  * GENERATED CODE !!! DO NOT CHANGE !!!
  */
 @Generated
-public enum TaskStatus {
+public enum TodoStatusDBO {
 
 	OPEN,
 	REQUEST,

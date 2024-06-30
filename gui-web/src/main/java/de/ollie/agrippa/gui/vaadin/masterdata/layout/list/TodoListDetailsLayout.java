@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.Todo;
+import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
 import de.ollie.agrippa.gui.vaadin.masterdata.dialog.TodoDetailsDialog;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
@@ -58,6 +59,7 @@ public class TodoListDetailsLayout extends VerticalLayout {
 			new TodoDetailsDialog(componentFactory, guiConfiguration, (toEdit, newItem) -> {
 				Todo mmbr = grid.getSelectedItems().toArray(new Todo[0])[0];
 				mmbr.setTitle(toEdit.getTitle());
+				mmbr.setStatus(toEdit.getStatus());
 				mmbr.setDescription(toEdit.getDescription());
 				grid.setItems(model.getTodos());
 			}, session, grid.getSelectedItems().toArray(new Todo[0])[0], serviceProvider, false).open();
@@ -75,6 +77,14 @@ public class TodoListDetailsLayout extends VerticalLayout {
 						resourceManager
 								.getLocalizedString(
 										"TodoListDetailsLayout.grid.header.title.label",
+										session.getLocalization()))
+				.setSortable(true);
+		grid
+				.addColumn(model -> getCellString("STATUS", model, () -> model.getStatus()))
+				.setHeader(
+						resourceManager
+								.getLocalizedString(
+										"TodoListDetailsLayout.grid.header.status.label",
 										session.getLocalization()))
 				.setSortable(true);
 		grid

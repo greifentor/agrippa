@@ -85,4 +85,11 @@
 	<changeSet author="dm-comp" id="Set-Field-TASK-in-Table-TODO-to-Nullable" runInTransaction="true" failOnError="true">
 		<dropNotNullConstraint columnName="TASK" tableName="TODO" columnDataType="BIGINT" />
 	</changeSet>
+	<changeSet author="dm-comp" id="Add" runInTransaction="true" failOnError="true">
+		<addColumn tableName="TODO">
+			<column name="STATUS" type="VARCHAR(30)" defaultValue="OPEN">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>

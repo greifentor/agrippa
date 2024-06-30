@@ -16,10 +16,12 @@ public abstract class GeneratedTodo<T extends Todo> {
 
 	public static final String ID = "ID";
 	public static final String DESCRIPTION = "DESCRIPTION";
+	public static final String STATUS = "STATUS";
 	public static final String TITLE = "TITLE";
 
 	private long id;
 	private String description;
+	private TodoStatus status = TodoStatus.OPEN;
 	private String title;
 
 	protected abstract T self();
@@ -31,6 +33,11 @@ public abstract class GeneratedTodo<T extends Todo> {
 
 	public T setDescription(String description) {
 		this.description = description;
+		return self();
+	}
+
+	public T setStatus(TodoStatus status) {
+		this.status = status;
 		return self();
 	}
 
