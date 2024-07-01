@@ -3,6 +3,8 @@ package de.ollie.agrippa.gui.vaadin.masterdata;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.accordion.AccordionPanel;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -11,14 +13,17 @@ import de.ollie.agrippa.core.model.Project;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.TaskStatus;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
+import de.ollie.agrippa.core.service.ProjectService;
+import de.ollie.agrippa.core.service.TaskService;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.component.AbstractMasterDataBaseLayout;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
-import de.ollie.agrippa.gui.vaadin.component.RemoveConfirmDialog;
-import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
 import de.ollie.agrippa.gui.vaadin.masterdata.layout.list.NoteListDetailsLayout;
 import de.ollie.agrippa.gui.vaadin.masterdata.layout.list.TodoListDetailsLayout;
+import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
+import de.ollie.agrippa.gui.vaadin.component.RemoveConfirmDialog;
+import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 
@@ -67,22 +72,22 @@ public class TaskDetailsLayout extends AbstractMasterDataBaseLayout {
 						"10px 10px 20px #e4e4e4, -10px 10px 20px #e4e4e4, -10px -10px 20px #e4e4e4, 10px -10px 20px #e4e4e4");
 		setMargin(false);
 		setWidthFull();
-        Accordion accordion = new Accordion();
-        accordion.add(new AccordionPanel(
-                resourceManager.getLocalizedString("TaskMaintenanceView.accordion.notes.label"),
-                new NoteListDetailsLayout(
-                        componentFactory, guiConfiguration, model, resourceManager, serviceProvider, session)));
-        accordion.add(new AccordionPanel(
-                resourceManager.getLocalizedString("TaskMaintenanceView.accordion.todos.label"),
-                new TodoListDetailsLayout(
-                        componentFactory, guiConfiguration, model, resourceManager, serviceProvider, session)));
-        accordion.setWidthFull();
+		Accordion accordion = new Accordion();
+		accordion.add(new AccordionPanel(
+				resourceManager.getLocalizedString("TaskDetailsLayout.accordion.NoteListDetailsLayout.label"),
+				new NoteListDetailsLayout(
+						componentFactory, guiConfiguration, model, resourceManager, serviceProvider, session)));
+		accordion.add(new AccordionPanel(
+				resourceManager.getLocalizedString("TaskDetailsLayout.accordion.TodoListDetailsLayout.label"),
+				new TodoListDetailsLayout(
+						componentFactory, guiConfiguration, model, resourceManager, serviceProvider, session)));
+		accordion.setWidthFull();
 		add(
 				textFieldTitle,
 				comboBoxProject,
 				comboBoxTaskStatus,
-                textAreaDescription,
-                accordion,
+				textAreaDescription,
+				accordion,
 				getMasterDataButtonLayout(model.getId() > 0));
 		textFieldTitle.focus();
 	}

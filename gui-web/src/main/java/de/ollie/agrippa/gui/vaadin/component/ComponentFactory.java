@@ -20,7 +20,6 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.QueryParameters;
 
 import de.ollie.agrippa.core.model.NoteType;
-import de.ollie.agrippa.core.model.Period;
 import de.ollie.agrippa.core.model.TaskStatus;
 import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.model.Note;
@@ -53,8 +52,6 @@ public class ComponentFactory {
 
 	@Autowired(required = false)
 	private ItemLabelGenerator<NoteType> noteTypeItemLabelGenerator;
-	@Autowired(required = false)
-	private ItemLabelGenerator<Period> periodItemLabelGenerator;
 	@Autowired(required = false)
 	private ItemLabelGenerator<TaskStatus> taskStatusItemLabelGenerator;
 	@Autowired(required = false)
