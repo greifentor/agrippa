@@ -19,10 +19,11 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.QueryParameters;
 
-import de.ollie.agrippa.core.model.AdditionalDisplayMode;
+import de.ollie.agrippa.core.model.NoteType;
 import de.ollie.agrippa.core.model.Period;
 import de.ollie.agrippa.core.model.TaskStatus;
 import de.ollie.agrippa.core.model.TodoStatus;
+import de.ollie.agrippa.core.model.Note;
 import de.ollie.agrippa.core.model.Project;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.Todo;
@@ -51,7 +52,7 @@ public class ComponentFactory {
 	private final ResourceManager resourceManager;
 
 	@Autowired(required = false)
-	private ItemLabelGenerator<AdditionalDisplayMode> additionalDisplayModeItemLabelGenerator;
+	private ItemLabelGenerator<NoteType> noteTypeItemLabelGenerator;
 	@Autowired(required = false)
 	private ItemLabelGenerator<Period> periodItemLabelGenerator;
 	@Autowired(required = false)
@@ -66,6 +67,8 @@ public class ComponentFactory {
 	@Autowired(required = false)
 	private ItemLabelGenerator<User> userItemLabelGenerator;
 
+	@Autowired(required = false)
+	private MasterDataGridFieldRenderer<Note> noteMasterDataGridFieldRenderer;
 	@Autowired(required = false)
 	private MasterDataGridFieldRenderer<Project> projectMasterDataGridFieldRenderer;
 	@Autowired(required = false)

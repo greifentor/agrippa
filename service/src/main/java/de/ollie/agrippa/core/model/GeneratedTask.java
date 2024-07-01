@@ -24,14 +24,16 @@ public abstract class GeneratedTask<T extends Task> {
 	public static final String DESCRIPTION = "DESCRIPTION";
 	public static final String TASKSTATUS = "TASKSTATUS";
 	public static final String TITLE = "TITLE";
+	public static final String NOTES = "NOTES";
 	public static final String TODOS = "TODOS";
 
 	private long id;
 	private Project project;
 	private User user;
 	private String description;
-	private TaskStatus taskStatus;
+	private TaskStatus taskStatus = TaskStatus.OPEN;
 	private String title;
+	private List<Note> notes = new ArrayList<>();
 	private List<Todo> todos = new ArrayList<>();
 
 	protected abstract T self();
@@ -63,6 +65,11 @@ public abstract class GeneratedTask<T extends Task> {
 
 	public T setTitle(String title) {
 		this.title = title;
+		return self();
+	}
+
+	public T setNotes(List<Note> notes) {
+		this.notes = notes;
 		return self();
 	}
 

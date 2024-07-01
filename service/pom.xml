@@ -117,7 +117,7 @@
 		<!-- dependency> <groupId>de.ollie</groupId> <artifactId>carp-core</artifactId> 
 			<version>1.0.0</version> </dependency -->
 
-		<!-- dependencies for jasper reports -->
+		<!-- dependencies for jasper reports - - >
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
@@ -137,7 +137,7 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.1</version>
-		</dependency>
+		</dependency -->
 
 		<!-- dependency> <groupId>de.ollie</groupId> <artifactId>carp-core</artifactId> 
 			<version>1.0.0</version> </dependency -->

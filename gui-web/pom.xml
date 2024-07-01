@@ -166,12 +166,6 @@
 		</dependency>
 
 		<!-- Vaadin addons -->
-		<!-- Add on for toggle buttons -->
-		<dependency>
-			<groupId>com.gmail.umit</groupId>
-			<artifactId>papertogglebuttonv14</artifactId>
-			<version>1.0.0</version>
-		</dependency>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-firefox-driver</artifactId>

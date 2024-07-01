@@ -2,9 +2,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd ">
 	<changeSet author="dm-comp" id="Initial-Scheme" runInTransaction="true" failOnError="true">
 		<createTable tableName="TODO">
-			<column name="TASK" type="BIGINT">
-				<constraints nullable="false" />
-			</column>
+			<column name="TASK" type="BIGINT" />
 			<column name="DESCRIPTION" type="LONGVARCHAR" />
 			<column name="TITLE" type="VARCHAR(100)">
 				<constraints nullable="false" />
@@ -91,5 +89,22 @@
 				<constraints nullable="false" />
 			</column>
 		</addColumn>
+	</changeSet>
+	<changeSet author="dm-comp" id="Add-Table-NOTE" runInTransaction="true" failOnError="true">
+		<createTable tableName="NOTE">
+			<column name="TASK" type="BIGINT" />
+			<column name="DESCRIPTION" type="LONGVARCHAR" />
+			<column name="TITLE" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TYPE" type="VARCHAR(30)" defaultValue="NOTE">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ID" tableName="NOTE" />
+		<addAutoIncrement columnDataType="BIGINT" columnName="ID" startWith="1" tableName="NOTE" />
 	</changeSet>
 </databaseChangeLog>

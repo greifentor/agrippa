@@ -24,6 +24,7 @@ public class TaskDBOConverter implements ToModelConverter<Task, TaskDBO> {
 	private final UserDBOConverter userDBOConverter;
 	private final TaskStatusDBOConverter taskStatusDBOConverter;
 	private final ProjectDBOConverter projectDBOConverter;
+	private final NoteDBOConverter noteDBOConverter;
 	private final TodoDBOConverter todoDBOConverter;
 
 	public TaskDBO toDBO(Task model) {
@@ -37,6 +38,7 @@ public class TaskDBOConverter implements ToModelConverter<Task, TaskDBO> {
 				.setDescription(model.getDescription())
 				.setTaskStatus(taskStatusDBOConverter.toDBO(model.getTaskStatus()))
 				.setTitle(model.getTitle())
+				.setNotes(noteDBOConverter.toDBO(model.getNotes()))
 				.setTodos(todoDBOConverter.toDBO(model.getTodos()));
 	}
 
@@ -59,6 +61,7 @@ public class TaskDBOConverter implements ToModelConverter<Task, TaskDBO> {
 				.setDescription(dbo.getDescription())
 				.setTaskStatus(taskStatusDBOConverter.toModel(dbo.getTaskStatus()))
 				.setTitle(dbo.getTitle())
+				.setNotes(noteDBOConverter.toModel(dbo.getNotes()))
 				.setTodos(todoDBOConverter.toModel(dbo.getTodos()));
 	}
 
