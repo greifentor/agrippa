@@ -10,6 +10,7 @@ import lombok.Generated;
 @Generated
 public enum TaskStatusDBO {
 
+	ON_HOLD,
 	OPEN,
 	REQUEST,
 	SOLVED;

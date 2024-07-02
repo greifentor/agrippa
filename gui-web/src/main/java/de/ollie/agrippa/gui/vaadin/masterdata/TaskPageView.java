@@ -1,8 +1,11 @@
 package de.ollie.agrippa.gui.vaadin.masterdata;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -51,6 +56,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 	public static final String URL = "agrippa/masterdata/tasks";
 
 	private static final Logger logger = LogManager.getLogger(TaskPageView.class);
+	private static final String PARAMETER_FILTER = "TaskPageView.Filter";
 
 	@Autowired(required = false)
 	private MasterDataGridFieldRenderer<Task> masterDataGridFieldRenderer;
@@ -66,6 +72,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 	private Button buttonEdit;
 	private Button buttonRemove;
 	private Grid<Task> grid;
+	private TextField textFieldFilter;
 	private VerticalLayout mainLayout;
 
 	@Override
@@ -80,6 +87,15 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 		getStyle().set("background-image", "url('" + guiConfiguration.getBackgroundFileName() + "')");
 		getStyle().set("background-size", "cover");
 		getStyle().set("background-attachment", "fixed");
+		textFieldFilter = new TextField();
+		textFieldFilter.addKeyUpListener(event -> {
+			if (event.getKey() == Key.ENTER) {
+				updateGrid(0);
+			}
+		});
+		textFieldFilter.setWidthFull();
+		session.findParameter(PARAMETER_FILTER).ifPresent(s -> textFieldFilter.setValue(s.toString()));
+		textFieldFilter.addValueChangeListener(event -> updateGrid(0));
 		buttonAdd = buttonFactory.createAddButton(resourceManager, event -> addRecord(), session);
 		buttonDuplicate = buttonFactory.createButton(resourceManager.getLocalizedString("commons.button.duplicate.text", session.getLocalization()));
 		buttonDuplicate.addClickListener(event -> duplicateRecord());
@@ -115,6 +131,19 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 		mainLayout.setMargin(false);
 		mainLayout.setSizeFull();
 		setSizeFull();
+		VerticalLayout filterLayout = new VerticalLayout();
+		filterLayout.getStyle().set("-moz-border-radius", "4px");
+		filterLayout.getStyle().set("-webkit-border-radius", "4px");
+		filterLayout.getStyle().set("border-radius", "4px");
+		filterLayout.getStyle().set("border", "1px solid #A9A9A9");
+		filterLayout
+				.getStyle()
+				.set(
+						"box-shadow",
+						"10px 10px 20px #e4e4e4, -10px 10px 20px #e4e4e4, -10px -10px 20px #e4e4e4, 10px -10px 20px #e4e4e4");
+		filterLayout.setMargin(false);
+		filterLayout.setWidthFull();
+		filterLayout.add(textFieldFilter);
 		VerticalLayout dataLayout = new VerticalLayout();
 		dataLayout.getStyle().set("-moz-border-radius", "4px");
 		dataLayout.getStyle().set("-webkit-border-radius", "4px");
@@ -134,13 +163,14 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
 						resourceManager.getLocalizedString("TaskPageView.header.label", session.getLocalization()),
 						HeaderLayoutMode.PLAIN),
+				filterLayout,
 				dataLayout);
 		updateGrid(0);
 		setButtonEnabled(buttonDuplicate, false);
 		setButtonEnabled(buttonEdit, false);
 		setButtonEnabled(buttonRemove, false);
 		setContent(mainLayout);
-		buttonAdd.focus();
+		textFieldFilter.focus();
 	}
 
 	private Object getHeaderString(String fieldName, Task aTable, Supplier<?> f) {
@@ -192,14 +222,51 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 				.setItems(
 						service
 								.findAll(new PageParameters().setEntriesPerPage(Integer.MAX_VALUE).setPageNumber(pageNumber))
-								.getEntries());
+								.getEntries()
+								.stream()
+								.filter(this::isMatching)
+								.collect(Collectors.toList()));
+	}
+
+	private boolean isMatching(Task model) {
+		List<String> patterns =
+				getWords(textFieldFilter.getValue()).stream().map(s -> s.toLowerCase()).collect(Collectors.toList());
+		if (patterns.isEmpty()) {
+			return true;
+		}
+		boolean b = true;
+		for (String pattern : patterns) {
+			b &= isMatchingPattern(pattern.toLowerCase(), model);
+		}
+		return b;
+	}
+
+	private List<String> getWords(String s) {
+		List<String> l = new ArrayList<>();
+		if (s != null) {
+			StringTokenizer st = new StringTokenizer(s, " ");
+			while (st.hasMoreTokens()) {
+				l.add(st.nextToken());
+			}
+		}
+		return l;
+	}
+
+	private boolean isMatchingPattern(String pattern, Task model) {
+		boolean result = false;
+		result = result || getHeaderString(Task.PROJECT, model, () -> model.getProject()).toString().toLowerCase().contains(pattern);
+		result = result || getHeaderString(Task.TASKSTATUS, model, () -> model.getTaskStatus()).toString().toLowerCase().contains(pattern);
+		result = result || getHeaderString(Task.TITLE, model, () -> model.getTitle()).toString().toLowerCase().contains(pattern);
+		return result;
 	}
 
 	private void addRecord() {
+		session.setParameter(PARAMETER_FILTER, textFieldFilter.getValue());
 		getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL));
 	}
 
 	private void duplicateRecord() {
+		session.setParameter(PARAMETER_FILTER, textFieldFilter.getValue());
 		grid.getSelectedItems().stream().findFirst().ifPresent(model -> {
 			QueryParameters parameters =
 					new QueryParameters(Map.of("id", List.of("" + model.getId()), "duplicate", List.of("true")));
@@ -208,6 +275,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 	}
 
 	private void editRecord() {
+		session.setParameter(PARAMETER_FILTER, textFieldFilter.getValue());
 		grid.getSelectedItems().stream().findFirst().ifPresent(model -> {
 			QueryParameters parameters = new QueryParameters(Map.of("id", List.of("" + model.getId())));
 			getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
@@ -219,7 +287,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 			new RemoveConfirmDialog(buttonFactory, () -> {
 				service.delete(model);
 				updateGrid(0);
-				buttonAdd.focus();
+				textFieldFilter.focus();
 			}, resourceManager, session).open();
 		});
 	}

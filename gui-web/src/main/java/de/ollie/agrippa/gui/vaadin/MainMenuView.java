@@ -126,9 +126,10 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		layout.setMargin(false);
 		layout.setPadding(false);
 		layout.setWidthFull();
-		layout.add(createLabel(todo.getStatus().name(), "5%"));
-		layout.add(createLabel(task.getTitle(), "35%"));
-		layout.add(createLabel(todo.getTitle(), "60%"));
+        layout.add(createLabel(todo.getStatus().name() + " (" + task.getTaskStatus() + ")", "10%"));
+        layout.add(createLabel(task.getProject().getTitle(), "20%"));
+        layout.add(createLabel(task.getTitle(), "20%"));
+        layout.add(createLabel(todo.getTitle(), "50%"));
 		return layout;
 	}
 
