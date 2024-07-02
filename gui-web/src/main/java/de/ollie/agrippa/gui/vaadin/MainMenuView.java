@@ -1,13 +1,16 @@
 package de.ollie.agrippa.gui.vaadin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeEvent;
@@ -28,7 +31,9 @@ import de.ollie.agrippa.gui.vaadin.component.ButtonGrid;
 import de.ollie.agrippa.gui.vaadin.component.HeaderLayout;
 import de.ollie.agrippa.gui.vaadin.component.HeaderLayout.HeaderLayoutMode;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataView;
+import lombok.AllArgsConstructor;
 import lombok.Generated;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -38,6 +43,13 @@ import lombok.RequiredArgsConstructor;
 @Route(MainMenuView.URL)
 @RequiredArgsConstructor
 public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUrlParameter<String> {
+
+	@AllArgsConstructor
+	@Getter
+	private class TaskTodoData {
+		private Task task;
+		private Todo todo;
+	}
 
 	public static final String URL = "agrippa/menu";
 
@@ -105,38 +117,40 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		layout.setMargin(false);
 		layout.setPadding(true);
 		layout.setSizeFull();
-		taskService
-				.findAll()
-				.stream()
-				.filter(t -> t.getTaskStatus() != TaskStatus.SOLVED)
-				.forEach(t -> addTodo(layout, t));
+		List<TaskTodoData> l = new ArrayList<>();
+		taskService.findAll().stream().filter(t -> t.getTaskStatus() != TaskStatus.SOLVED).forEach(t -> addTodo(l, t));
+		Grid<TaskTodoData> grid = new Grid<>();
+		addColumn(grid, ttd -> ttd.getTodo().getStatus().name() + " (" + ttd.getTask().getTaskStatus() + ")", 0, "10%");
+		addColumn(grid, ttd -> ttd.getTask().getProject().getTitle(), 1, "20%");
+		addColumn(grid, ttd -> ttd.getTask().getTitle(), 2, "20%");
+		addColumn(grid, ttd -> ttd.getTodo().getTitle(), 3, "50%");
+		grid.setItems(l);
+		grid.setPageSize(20);
+		grid.setWidthFull();
+		grid.setMultiSort(true);
+		layout.add(grid);
 		return layout;
 	}
 
-	private void addTodo(VerticalLayout layout, Task task) {
+	private void addColumn(Grid<TaskTodoData> grid, ValueProvider<TaskTodoData, ?> valueProvider, int columnNr,
+			String width) {
+		grid
+				.addColumn(valueProvider)
+				.setHeader(
+						resourceManager
+								.getLocalizedString(
+										"MainMenuView.gridTaskTodos.column." + columnNr + ".label",
+										session.getLocalization()))
+				.setSortable(true)
+				.setWidth(width);
+	}
+
+	private void addTodo(List<TaskTodoData> l, Task task) {
 		task
 				.getTodos()
 				.stream()
 				.filter(t -> t.getStatus() != TodoStatus.SOLVED)
-				.forEach(t -> layout.add(createTodoLayout(task, t)));
-	}
-
-	private Component createTodoLayout(Task task, Todo todo) {
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setMargin(false);
-		layout.setPadding(false);
-		layout.setWidthFull();
-        layout.add(createLabel(todo.getStatus().name() + " (" + task.getTaskStatus() + ")", "10%"));
-        layout.add(createLabel(task.getProject().getTitle(), "20%"));
-        layout.add(createLabel(task.getTitle(), "20%"));
-        layout.add(createLabel(todo.getTitle(), "50%"));
-		return layout;
-	}
-
-	private Component createLabel(String text, String width) {
-		Label label = new Label(text);
-		label.setWidth(width);
-		return label;
+				.forEach(t -> l.add(new TaskTodoData(task, t)));
 	}
 
 	private void switchToMasterData() {
