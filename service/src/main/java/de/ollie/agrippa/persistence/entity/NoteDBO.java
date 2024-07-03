@@ -1,5 +1,7 @@
 package de.ollie.agrippa.persistence.entity;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -32,6 +34,8 @@ public class NoteDBO {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID", nullable = false)
 	private long id;
+	@Column(name = "CREATION_DATE", nullable = false)
+	private LocalDateTime creationDate;
 	@Column(name = "DESCRIPTION")
 	private String description;
 	@Column(name = "TITLE", nullable = false)

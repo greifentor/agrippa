@@ -9,6 +9,7 @@ import com.vaadin.flow.component.textfield.TextField;
 
 import de.ollie.agrippa.gui.vaadin.component.Button;
 import de.ollie.agrippa.core.model.Todo;
+import de.ollie.agrippa.core.model.TodoPriority;
 import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
@@ -38,6 +39,7 @@ public class TodoDetailsDialog extends Dialog {
 	private Button buttonCancel;
 	private Button buttonSave;
 	private TextField textFieldTitle;
+	private ComboBox<TodoPriority> comboBoxPriority;
 	private ComboBox<TodoStatus> comboBoxStatus;
 	private TextArea textAreaDescription;
 	private VerticalLayout mainLayout;
@@ -55,6 +57,7 @@ public class TodoDetailsDialog extends Dialog {
 		this.session = session;
 		if (model != null) {
 			this.model.setTitle(model.getTitle());
+			this.model.setPriority(model.getPriority());
 			this.model.setStatus(model.getStatus());
 			this.model.setDescription(model.getDescription());
 		}
@@ -76,6 +79,11 @@ public class TodoDetailsDialog extends Dialog {
 			model.setTitle(event.getValue());
 			updateSaveButton();
 		});
+		comboBoxPriority = componentFactory.createComboBox("TodoDetailsLayout.field.priority.label", model.getPriority(), TodoPriority.values(), componentFactory.getTodoPriorityItemLabelGenerator(), session);
+		comboBoxPriority.addValueChangeListener(event -> {
+			model.setPriority(event.getValue());
+			updateSaveButton();
+		});
 		comboBoxStatus = componentFactory.createComboBox("TodoDetailsLayout.field.status.label", model.getStatus(), TodoStatus.values(), componentFactory.getTodoStatusItemLabelGenerator(), session);
 		comboBoxStatus.addValueChangeListener(event -> {
 			model.setStatus(event.getValue());
@@ -88,6 +96,7 @@ public class TodoDetailsDialog extends Dialog {
 		});
 		mainLayout.add(
 				textFieldTitle,
+				comboBoxPriority,
 				comboBoxStatus,
 				textAreaDescription
 		);
@@ -96,6 +105,7 @@ public class TodoDetailsDialog extends Dialog {
 	private void updateSaveButton() {
 		setButtonEnabled(buttonSave,
 				(textFieldTitle.getValue() != null) &&
+				(comboBoxPriority.getValue() != null) &&
 				(comboBoxStatus.getValue() != null)
 		);
 	}

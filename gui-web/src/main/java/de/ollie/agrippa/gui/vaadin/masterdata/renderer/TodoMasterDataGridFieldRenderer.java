@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import de.ollie.agrippa.core.model.Todo;
+import de.ollie.agrippa.core.model.TodoPriority;
 import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGridFieldRenderer;
@@ -26,6 +27,9 @@ public class TodoMasterDataGridFieldRenderer implements MasterDataGridFieldRende
 
 	@Override
 	public Object getHeaderString(String fieldName, Todo model) {
+		if (Todo.PRIORITY.equals(fieldName)) {
+			return componentFactory.getTodoPriorityItemLabelGenerator().apply(model.getPriority());
+		}
 		if (Todo.STATUS.equals(fieldName)) {
 			return componentFactory.getTodoStatusItemLabelGenerator().apply(model.getStatus());
 		}
@@ -34,6 +38,9 @@ public class TodoMasterDataGridFieldRenderer implements MasterDataGridFieldRende
 
 	@Override
 	public boolean hasRenderingFor(String fieldName) {
+		if (Todo.PRIORITY.equals(fieldName) && (componentFactory.getTodoPriorityItemLabelGenerator() != null)) {
+			return true;
+		}
 		if (Todo.STATUS.equals(fieldName) && (componentFactory.getTodoStatusItemLabelGenerator() != null)) {
 			return true;
 		}

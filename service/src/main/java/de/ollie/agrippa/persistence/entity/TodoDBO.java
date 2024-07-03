@@ -35,6 +35,9 @@ public class TodoDBO {
 	@Column(name = "DESCRIPTION")
 	private String description;
 	@Enumerated(EnumType.STRING)
+	@Column(name = "PRIORITY", nullable = false)
+	private TodoPriorityDBO priority;
+	@Enumerated(EnumType.STRING)
 	@Column(name = "STATUS", nullable = false)
 	private TodoStatusDBO status;
 	@Column(name = "TITLE", nullable = false)

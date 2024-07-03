@@ -3,15 +3,16 @@ package de.ollie.agrippa.persistence.entity;
 import lombok.Generated;
 
 /**
- * A DBO enum for notetypes.
+ * A DBO enum for todoprioritys.
  *
  * GENERATED CODE !!! DO NOT CHANGE !!!
  */
 @Generated
-public enum NoteTypeDBO {
+public enum TodoPriorityDBO {
 
-	CALL,
-	LINK,
-	NOTE;
+	URGENT,
+	HIGH,
+	MEDIUM,
+	LOW;
 
 }

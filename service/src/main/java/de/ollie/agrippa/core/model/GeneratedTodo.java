@@ -16,11 +16,13 @@ public abstract class GeneratedTodo<T extends Todo> {
 
 	public static final String ID = "ID";
 	public static final String DESCRIPTION = "DESCRIPTION";
+	public static final String PRIORITY = "PRIORITY";
 	public static final String STATUS = "STATUS";
 	public static final String TITLE = "TITLE";
 
 	private long id;
 	private String description;
+	private TodoPriority priority = TodoPriority.MEDIUM;
 	private TodoStatus status = TodoStatus.OPEN;
 	private String title;
 
@@ -33,6 +35,11 @@ public abstract class GeneratedTodo<T extends Todo> {
 
 	public T setDescription(String description) {
 		this.description = description;
+		return self();
+	}
+
+	public T setPriority(TodoPriority priority) {
+		this.priority = priority;
 		return self();
 	}
 

@@ -3,15 +3,16 @@ package de.ollie.agrippa.core.model;
 import lombok.Generated;
 
 /**
- * An enum for notetypes.
+ * An enum for todoprioritys.
  *
  * GENERATED CODE !!! DO NOT CHANGE !!!
  */
 @Generated
-public enum NoteType {
+public enum TodoPriority {
 
-	CALL,
-	LINK,
-	NOTE;
+	URGENT,
+	HIGH,
+	MEDIUM,
+	LOW;
 
 }

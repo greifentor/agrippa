@@ -2,14 +2,24 @@ package de.ollie.agrippa.gui.vaadin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -25,12 +35,18 @@ import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.service.TaskService;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
+import de.ollie.agrippa.gui.vaadin.MainMenuView.TaskTodoData;
 import de.ollie.agrippa.gui.vaadin.component.Button;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
 import de.ollie.agrippa.gui.vaadin.component.ButtonGrid;
+import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
 import de.ollie.agrippa.gui.vaadin.component.HeaderLayout;
 import de.ollie.agrippa.gui.vaadin.component.HeaderLayout.HeaderLayoutMode;
+import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
+import de.ollie.agrippa.gui.vaadin.component.TextField;
+import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataView;
+import de.ollie.agrippa.gui.vaadin.masterdata.dialog.TodoDetailsDialog;
 import lombok.AllArgsConstructor;
 import lombok.Generated;
 import lombok.Getter;
@@ -46,9 +62,17 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 
 	@AllArgsConstructor
 	@Getter
-	private class TaskTodoData {
+    class TaskTodoData {
 		private Task task;
 		private Todo todo;
+
+        String getTodoAndTaskStatus() {
+            return getTodo().getStatus().name() + " (" + getTask().getTaskStatus() + ")";
+        }
+
+        String getPriorityStr() {
+            return "(" + getTodo().getPriority().ordinal() + ") " + getTodo().getPriority().name();
+        }
 	}
 
 	public static final String URL = "agrippa/menu";
@@ -56,11 +80,22 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	private static final Logger LOG = LogManager.getLogger(MainMenuView.class);
 
 	private final ButtonFactory buttonFactory;
+    private final ComponentFactory componentFactory;
 	private final GUIConfiguration guiConfiguration;
+    private final MasterDataGUIConfiguration masterDataGUIConfiguration;
 	private final ResourceManager resourceManager;
+    private final ServiceProvider serviceProvider;
 	private final SessionData session;
 	private final TaskService taskService;
 	private final WebAppConfiguration configuration;
+
+    private Grid<TaskTodoData> grid;
+    private TaskTodoDataFilter filter;
+    private Column<TaskTodoData> priorityColumn;
+    private Column<TaskTodoData> projectTitleColumn;
+    private Column<TaskTodoData> taskTitleColumn;
+    private Column<TaskTodoData> todoTitleColumn;
+    private Column<TaskTodoData> todoAndTaskStatusColumn;
 
 	@Override
 	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
@@ -117,33 +152,71 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		layout.setMargin(false);
 		layout.setPadding(true);
 		layout.setSizeFull();
-		List<TaskTodoData> l = new ArrayList<>();
-		taskService.findAll().stream().filter(t -> t.getTaskStatus() != TaskStatus.SOLVED).forEach(t -> addTodo(l, t));
-		Grid<TaskTodoData> grid = new Grid<>();
-		addColumn(grid, ttd -> ttd.getTodo().getStatus().name() + " (" + ttd.getTask().getTaskStatus() + ")", 0, "10%");
-		addColumn(grid, ttd -> ttd.getTask().getProject().getTitle(), 1, "20%");
-		addColumn(grid, ttd -> ttd.getTask().getTitle(), 2, "20%");
-		addColumn(grid, ttd -> ttd.getTodo().getTitle(), 3, "50%");
-		grid.setItems(l);
-		grid.setPageSize(20);
+        grid = new Grid<>();
+        todoAndTaskStatusColumn = addColumn(grid, ttd -> ttd.getTodoAndTaskStatus(), 0, "10%");
+        priorityColumn = addColumn(grid,
+                ttd -> ttd.getPriorityStr(),
+                1,
+                "10%");
+        projectTitleColumn = addColumn(grid,
+                ttd -> ttd.getTask().getProject().getTitle(),
+                2,
+                "20%");
+        taskTitleColumn = addColumn0(grid, ttd -> new Label(ttd.getTask().getTitle()), 3, "20%");
+        todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 4, "40%");
+        updateGrid();
+        grid.setAllRowsVisible(true);
 		grid.setWidthFull();
 		grid.setMultiSort(true);
-		layout.add(grid);
-		return layout;
+        grid.addItemClickListener(e -> edit(e.getItem()));
+        layout.add(grid);
+        return layout;
 	}
 
-	private void addColumn(Grid<TaskTodoData> grid, ValueProvider<TaskTodoData, ?> valueProvider, int columnNr,
-			String width) {
-		grid
-				.addColumn(valueProvider)
-				.setHeader(
-						resourceManager
-								.getLocalizedString(
-										"MainMenuView.gridTaskTodos.column." + columnNr + ".label",
-										session.getLocalization()))
-				.setSortable(true)
-				.setWidth(width);
-	}
+    private void updateGrid() {
+        List<TaskTodoData> l = new ArrayList<>();
+        for (Task t : taskService.findAll()
+                .stream()
+                .filter(t -> t.getTaskStatus() != TaskStatus.SOLVED)
+                .collect(Collectors.toList())) {
+            addTodo(l, t);
+        }
+        l = l.stream()
+                .sorted((ttd0, ttd1) -> ttd0.getPriorityStr().compareTo(ttd1.getPriorityStr()))
+                .collect(Collectors.toList());
+        GridListDataView<TaskTodoData> dataView = grid.setItems(l);
+        filter = new TaskTodoDataFilter(dataView);
+        HeaderRow headerRow = grid.getHeaderRows().size() < 2 ? grid.appendHeaderRow() : grid.getHeaderRows().get(1);
+        headerRow.getCell(priorityColumn).setComponent(createFilterHeader("Priority", filter::setTodoPriority));
+        headerRow.getCell(projectTitleColumn).setComponent(createFilterHeader("Project", filter::setProjectTitle));
+        headerRow.getCell(taskTitleColumn).setComponent(createFilterHeader("Task", filter::setTaskTitle));
+        headerRow.getCell(todoAndTaskStatusColumn)
+                .setComponent(createFilterHeader("Name", filter::setTodoAndTaskStatus));
+        headerRow.getCell(todoTitleColumn).setComponent(createFilterHeader("Todo", filter::setTodoTitle));
+    }
+
+    private Column<TaskTodoData> addColumn(Grid<TaskTodoData> grid, ValueProvider<TaskTodoData, ?> valueProvider,
+            int columnNr,
+            String width) {
+        return grid.addColumn(valueProvider)
+                .setHeader(
+                        resourceManager.getLocalizedString("MainMenuView.gridTaskTodos.column." + columnNr + ".label",
+                                session.getLocalization()))
+                .setSortable(true)
+                .setWidth(width);
+    }
+
+    private Column<TaskTodoData> addColumn0(Grid<TaskTodoData> grid,
+            SerializableFunction<TaskTodoData, Component> renderer,
+            int columnNr, String width) {
+        return grid
+                .addColumn(new ComponentRenderer<Component, TaskTodoData>(renderer))
+                .setHeader(
+                        resourceManager.getLocalizedString("MainMenuView.gridTaskTodos.column." + columnNr + ".label",
+                                session.getLocalization()))
+                .setSortable(true)
+                .setWidth(width);
+    }
 
 	private void addTodo(List<TaskTodoData> l, Task task) {
 		task
@@ -157,4 +230,88 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		getUI().ifPresent(ui -> ui.navigate(MasterDataView.URL));
 	}
 
+    private static Component createFilterHeader(String labelText, Consumer<String> filterChangeConsumer) {
+        TextField textField = new TextField();
+        textField.setValueChangeMode(ValueChangeMode.EAGER);
+        textField.setClearButtonVisible(true);
+        textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        textField.setWidthFull();
+        textField.getStyle().set("max-width", "100%");
+        textField.addValueChangeListener(e -> filterChangeConsumer.accept(e.getValue()));
+        return textField;
+    }
+
+    private void edit(TaskTodoData ttd) {
+        new TodoDetailsDialog(
+                componentFactory, masterDataGUIConfiguration, (t, b) -> {
+                    ttd.getTodo().setDescription(t.getDescription());
+                    ttd.getTodo().setPriority(t.getPriority());
+                    ttd.getTodo().setStatus(t.getStatus());
+                    ttd.getTodo().setTitle(t.getTitle());
+                    taskService.update(ttd.getTask());
+                    updateGrid();
+                }, session, ttd.todo,
+                serviceProvider,
+                false).open();
+    }
+
+}
+
+class TaskTodoDataFilter {
+    private GridListDataView<TaskTodoData> dataView;
+
+    private String projectTitle;
+    private String taskTitle;
+    private String todoTitle;
+    private String todoAndTaskStatus;
+    private String todoPriorityStr;
+
+    public TaskTodoDataFilter(GridListDataView<TaskTodoData> dataView) {
+        this.dataView = dataView;
+        this.dataView.addFilter(this::test);
+    }
+
+    public void setDataView(GridListDataView<TaskTodoData> dataView) {
+        this.dataView = dataView;
+    }
+
+    public void setProjectTitle(String projectTitle) {
+        this.projectTitle = projectTitle;
+        this.dataView.refreshAll();
+    }
+
+    public void setTaskTitle(String taskTitle) {
+        this.taskTitle = taskTitle;
+        this.dataView.refreshAll();
+    }
+
+    public void setTodoTitle(String todoTitle) {
+        this.todoTitle = todoTitle;
+        this.dataView.refreshAll();
+    }
+
+    public void setTodoAndTaskStatus(String todoAndTaskStatus) {
+        this.todoAndTaskStatus = todoAndTaskStatus;
+        this.dataView.refreshAll();
+    }
+
+    public void setTodoPriority(String todoPriorityStr) {
+        this.todoPriorityStr = todoPriorityStr;
+        this.dataView.refreshAll();
+    }
+
+    public boolean test(TaskTodoData taskTodoData) {
+        boolean matchesProjectTitle = matches(taskTodoData.getTask().getProject().getTitle(), projectTitle);
+        boolean matchesTaskTitle = matches(taskTodoData.getTask().getTitle(), taskTitle);
+        boolean matchesTodoTitle = matches(taskTodoData.getTodo().getTitle(), todoTitle);
+        boolean matchesTodoAndTaskStatus = matches(taskTodoData.getTodoAndTaskStatus(), todoAndTaskStatus);
+        boolean matchesTodoPriority = matches(taskTodoData.getPriorityStr(), todoPriorityStr);
+
+        return matchesProjectTitle && matchesTaskTitle && matchesTodoTitle && matchesTodoAndTaskStatus
+                && matchesTodoPriority;
+    }
+
+    private boolean matches(String value, String searchTerm) {
+        return searchTerm == null || searchTerm.isEmpty() || value.toLowerCase().contains(searchTerm.toLowerCase());
+    }
 }

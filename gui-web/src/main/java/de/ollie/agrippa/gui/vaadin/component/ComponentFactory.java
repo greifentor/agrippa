@@ -1,5 +1,6 @@
 package de.ollie.agrippa.gui.vaadin.component;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -9,29 +10,33 @@ import javax.inject.Named;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.QueryParameters;
 
-import de.ollie.agrippa.core.model.NoteType;
-import de.ollie.agrippa.core.model.TaskStatus;
-import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.model.Note;
+import de.ollie.agrippa.core.model.NoteType;
 import de.ollie.agrippa.core.model.Project;
 import de.ollie.agrippa.core.model.Task;
+import de.ollie.agrippa.core.model.TaskStatus;
 import de.ollie.agrippa.core.model.Todo;
+import de.ollie.agrippa.core.model.TodoPriority;
+import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.model.User;
+import de.ollie.agrippa.core.model.localization.LocalizationSO;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.ApplicationStartView;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGridFieldRenderer;
-
 import lombok.Generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +59,8 @@ public class ComponentFactory {
 	private ItemLabelGenerator<NoteType> noteTypeItemLabelGenerator;
 	@Autowired(required = false)
 	private ItemLabelGenerator<TaskStatus> taskStatusItemLabelGenerator;
+	@Autowired(required = false)
+	private ItemLabelGenerator<TodoPriority> todoPriorityItemLabelGenerator;
 	@Autowired(required = false)
 	private ItemLabelGenerator<TodoStatus> todoStatusItemLabelGenerator;
 
@@ -238,5 +245,10 @@ public class ComponentFactory {
 		textArea.setWidthFull();
 		return textArea;
 	}
+
+    public DateTimePicker createDateTimePicker(String resourceId, LocalizationSO localization, LocalDateTime timestamp,
+            ValueChangeListener<ComponentValueChangeEvent<DateTimePicker, LocalDateTime>> listener) {
+        return new DateTimePicker(resourceManager.getLocalizedString(resourceId, localization), timestamp, listener);
+    }
 
 }
