@@ -20,6 +20,7 @@ public abstract class GeneratedTask<T extends Task> {
 
 	public static final String ID = "ID";
 	public static final String PROJECT = "PROJECT";
+	public static final String TEAM = "TEAM";
 	public static final String USER = "USER";
 	public static final String DESCRIPTION = "DESCRIPTION";
 	public static final String TASKSTATUS = "TASKSTATUS";
@@ -29,6 +30,7 @@ public abstract class GeneratedTask<T extends Task> {
 
 	private long id;
 	private Project project;
+	private Team team;
 	private User user;
 	private String description;
 	private TaskStatus taskStatus = TaskStatus.OPEN;
@@ -45,6 +47,11 @@ public abstract class GeneratedTask<T extends Task> {
 
 	public T setProject(Project project) {
 		this.project = project;
+		return self();
+	}
+
+	public T setTeam(Team team) {
+		this.team = team;
 		return self();
 	}
 

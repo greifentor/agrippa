@@ -12,9 +12,11 @@ import com.vaadin.flow.component.textfield.TextField;
 import de.ollie.agrippa.core.model.Project;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.TaskStatus;
+import de.ollie.agrippa.core.model.Team;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.core.service.ProjectService;
 import de.ollie.agrippa.core.service.TaskService;
+import de.ollie.agrippa.core.service.TeamService;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.component.AbstractMasterDataBaseLayout;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
@@ -44,6 +46,7 @@ public class TaskDetailsLayout extends AbstractMasterDataBaseLayout {
 	private final Observer observer;
 	private final DetailsLayoutComboBoxItemLabelGenerator<Task> comboBoxItemLabelGenerator;
 
+	private ComboBox<Team> comboBoxTeam;
 	private ComboBox<Project> comboBoxProject;
 	private TextField textFieldTitle;
 	private ComboBox<TaskStatus> comboBoxTaskStatus;
@@ -53,6 +56,13 @@ public class TaskDetailsLayout extends AbstractMasterDataBaseLayout {
 	public void onAttach(AttachEvent attachEvent) {
 		super.onAttach(attachEvent);
 		createButtons();
+		comboBoxTeam = createComboBox("TaskDetailsLayout.field.team.label", model.getTeam(), serviceProvider.getTeamService().findAll().toArray(new Team[0]));
+		comboBoxTeam
+				.setItemLabelGenerator(
+						team  -> comboBoxItemLabelGenerator != null
+								? comboBoxItemLabelGenerator.getLabel(Task.TEAM, team)
+								: "" + team.getTitle());
+		comboBoxTeam.setClearButtonVisible(true);
 		comboBoxProject = createComboBox("TaskDetailsLayout.field.project.label", model.getProject(), serviceProvider.getProjectService().findAll().toArray(new Project[0]));
 		comboBoxProject
 				.setItemLabelGenerator(
@@ -85,6 +95,7 @@ public class TaskDetailsLayout extends AbstractMasterDataBaseLayout {
 		add(
 				textFieldTitle,
 				comboBoxProject,
+				comboBoxTeam,
 				comboBoxTaskStatus,
 				textAreaDescription,
 				accordion,
@@ -119,6 +130,7 @@ public class TaskDetailsLayout extends AbstractMasterDataBaseLayout {
 	protected void save() {
 		model.setTitle(textFieldTitle.getValue());
 		model.setProject(comboBoxProject.getValue());
+		model.setTeam(comboBoxTeam.getValue());
 		model.setTaskStatus(comboBoxTaskStatus.getValue());
 		model.setDescription(textAreaDescription.getValue());
 		observer.save(serviceProvider.getTaskService().update(model));

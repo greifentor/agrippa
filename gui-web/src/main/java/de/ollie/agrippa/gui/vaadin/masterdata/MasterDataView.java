@@ -85,12 +85,22 @@ public class MasterDataView extends Scroller implements BeforeEnterObserver, Has
 												session.getLocalization()));
 		buttonMasterDataTask.addClickListener(event -> switchToSourceTask());
 		buttonMasterDataTask.setWidthFull();
+		Button buttonMasterDataTeam =
+				buttonFactory
+						.createButton(
+								resourceManager
+										.getLocalizedString(
+												"master-data.button.team.text",
+												session.getLocalization()));
+		buttonMasterDataTeam.addClickListener(event -> switchToSourceTeam());
+		buttonMasterDataTeam.setWidthFull();
 		List<Button> buttons =
 				new ArrayList<>(
 						Arrays
 								.asList(
 										buttonMasterDataProject,
-										buttonMasterDataTask
+										buttonMasterDataTask,
+										buttonMasterDataTeam
 								));
 		if (masterDataViewButtonAdder != null) {
 			buttons.addAll(masterDataViewButtonAdder.createButtonsToAdd(session, () -> getUI()));
@@ -119,6 +129,10 @@ public class MasterDataView extends Scroller implements BeforeEnterObserver, Has
 
 	private void switchToSourceTask() {
 		getUI().ifPresent(ui -> ui.navigate(TaskPageView.URL));
+	}
+
+	private void switchToSourceTeam() {
+		getUI().ifPresent(ui -> ui.navigate(TeamPageView.URL));
 	}
 
 }

@@ -126,4 +126,22 @@
 			<column name="URL" type="VARCHAR(1000)" />
 		</addColumn>
 	</changeSet>
+	<changeSet author="dm-comp" id="Add-Table-TEAM" runInTransaction="true" failOnError="true">
+		<createTable tableName="TEAM">
+			<column name="DESCRIPTION" type="LONGVARCHAR" />
+			<column name="TITLE" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ID" tableName="TEAM" />
+		<addAutoIncrement columnDataType="BIGINT" columnName="ID" startWith="1" tableName="TEAM" />
+		<addColumn tableName="TASK">
+			<column name="TEAM" type="BIGINT" />
+		</addColumn>
+		<addForeignKeyConstraint baseColumnNames="TEAM" baseTableName="TASK" constraintName="FK_TASK_TEAM_TO_TEAM" referencedColumnNames="ID" referencedTableName="TEAM" />
+		<addForeignKeyConstraint baseColumnNames="TASK" baseTableName="NOTE" constraintName="FK_NOTE_TASK_TO_TASK" referencedColumnNames="ID" referencedTableName="TASK" />
+	</changeSet>
 </databaseChangeLog>

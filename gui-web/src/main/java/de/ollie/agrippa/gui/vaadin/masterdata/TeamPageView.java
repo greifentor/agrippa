@@ -27,9 +27,9 @@ import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 
-import de.ollie.agrippa.core.model.Task;
+import de.ollie.agrippa.core.model.Team;
 import de.ollie.agrippa.core.model.PageParameters;
-import de.ollie.agrippa.core.service.TaskService;
+import de.ollie.agrippa.core.service.TeamService;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.UserAuthorizationChecker;
@@ -44,34 +44,34 @@ import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 
 /**
- * A view for paginated task lists.
+ * A view for paginated team lists.
  *
  * GENERATED CODE !!! DO NOT CHANGE !!!
  */
 @Generated
-@Route(TaskPageView.URL)
+@Route(TeamPageView.URL)
 @RequiredArgsConstructor
-public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUrlParameter<String> {
+public class TeamPageView extends Scroller implements BeforeEnterObserver, HasUrlParameter<String> {
 
-	public static final String URL = "agrippa/masterdata/tasks";
+	public static final String URL = "agrippa/masterdata/teams";
 
-	private static final Logger logger = LogManager.getLogger(TaskPageView.class);
-	private static final String PARAMETER_FILTER = "TaskPageView.Filter";
+	private static final Logger logger = LogManager.getLogger(TeamPageView.class);
+	private static final String PARAMETER_FILTER = "TeamPageView.Filter";
 
 	@Autowired(required = false)
-	private MasterDataGridFieldRenderer<Task> masterDataGridFieldRenderer;
+	private MasterDataGridFieldRenderer<Team> masterDataGridFieldRenderer;
 
 	private final ButtonFactory buttonFactory;
 	private final ResourceManager resourceManager;
 	private final MasterDataGUIConfiguration guiConfiguration;
-	private final TaskService service;
+	private final TeamService service;
 	private final SessionData session;
 
 	private Button buttonAdd;
 	private Button buttonDuplicate;
 	private Button buttonEdit;
 	private Button buttonRemove;
-	private Grid<Task> grid;
+	private Grid<Team> grid;
 	private TextField textFieldFilter;
 	private VerticalLayout mainLayout;
 
@@ -104,23 +104,11 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 		grid = new Grid<>();
 		grid
 				.addColumn(model -> getHeaderString("TITLE", model, () -> model.getTitle()))
-				.setHeader(resourceManager.getLocalizedString("TaskPageView.grid.header.title.label", session.getLocalization()))
-				.setSortable(true);
-		grid
-				.addColumn(model -> getHeaderString("PROJECT", model, () -> model.getProject()))
-				.setHeader(resourceManager.getLocalizedString("TaskPageView.grid.header.project.label", session.getLocalization()))
-				.setSortable(true);
-		grid
-				.addColumn(model -> getHeaderString("TEAM", model, () -> model.getTeam()))
-				.setHeader(resourceManager.getLocalizedString("TaskPageView.grid.header.team.label", session.getLocalization()))
-				.setSortable(true);
-		grid
-				.addColumn(model -> getHeaderString("TASKSTATUS", model, () -> model.getTaskStatus()))
-				.setHeader(resourceManager.getLocalizedString("TaskPageView.grid.header.taskstatus.label", session.getLocalization()))
+				.setHeader(resourceManager.getLocalizedString("TeamPageView.grid.header.title.label", session.getLocalization()))
 				.setSortable(true);
 		grid
 				.addColumn(model -> getHeaderString("DESCRIPTION", model, () -> model.getDescription()))
-				.setHeader(resourceManager.getLocalizedString("TaskPageView.grid.header.description.label", session.getLocalization()))
+				.setHeader(resourceManager.getLocalizedString("TeamPageView.grid.header.description.label", session.getLocalization()))
 				.setSortable(true);
 		grid.setMultiSort(true);
 		grid.setWidthFull();
@@ -165,7 +153,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 				new HeaderLayout(
 						buttonFactory.createBackButton(resourceManager, this::getUI, MasterDataView.URL, session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
-						resourceManager.getLocalizedString("TaskPageView.header.label", session.getLocalization()),
+						resourceManager.getLocalizedString("TeamPageView.header.label", session.getLocalization()),
 						HeaderLayoutMode.PLAIN),
 				filterLayout,
 				dataLayout);
@@ -177,13 +165,13 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 		textFieldFilter.focus();
 	}
 
-	private Object getHeaderString(String fieldName, Task aTable, Supplier<?> f) {
+	private Object getHeaderString(String fieldName, Team aTable, Supplier<?> f) {
 		return masterDataGridFieldRenderer != null && masterDataGridFieldRenderer.hasRenderingFor(fieldName)
 				? masterDataGridFieldRenderer.getHeaderString(fieldName, aTable)
 				: f.get();
 	}
 
-	private void enabledButtons(SelectionEvent<Grid<Task>, Task> event) {
+	private void enabledButtons(SelectionEvent<Grid<Team>, Team> event) {
 		if (event.getFirstSelectedItem().isEmpty()) {
 			setButtonEnabled(buttonAdd, true);
 			setButtonEnabled(buttonDuplicate, false);
@@ -210,7 +198,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
-		logger.info("Task page layout opened for user '{}'.", session.getUserName());
+		logger.info("Team page layout opened for user '{}'.", session.getUserName());
 		super.onAttach(attachEvent);
 	}
 
@@ -232,7 +220,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 								.collect(Collectors.toList()));
 	}
 
-	private boolean isMatching(Task model) {
+	private boolean isMatching(Team model) {
 		List<String> patterns =
 				getWords(textFieldFilter.getValue()).stream().map(s -> s.toLowerCase()).collect(Collectors.toList());
 		if (patterns.isEmpty()) {
@@ -256,18 +244,15 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 		return l;
 	}
 
-	private boolean isMatchingPattern(String pattern, Task model) {
+	private boolean isMatchingPattern(String pattern, Team model) {
 		boolean result = false;
-		result = result || getHeaderString(Task.PROJECT, model, () -> model.getProject()).toString().toLowerCase().contains(pattern);
-		result = result || getHeaderString(Task.TEAM, model, () -> model.getTeam()).toString().toLowerCase().contains(pattern);
-		result = result || getHeaderString(Task.TASKSTATUS, model, () -> model.getTaskStatus()).toString().toLowerCase().contains(pattern);
-		result = result || getHeaderString(Task.TITLE, model, () -> model.getTitle()).toString().toLowerCase().contains(pattern);
+		result = result || getHeaderString(Team.TITLE, model, () -> model.getTitle()).toString().toLowerCase().contains(pattern);
 		return result;
 	}
 
 	private void addRecord() {
 		session.setParameter(PARAMETER_FILTER, textFieldFilter.getValue());
-		getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL));
+		getUI().ifPresent(ui -> ui.navigate(TeamMaintenanceView.URL));
 	}
 
 	private void duplicateRecord() {
@@ -275,7 +260,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 		grid.getSelectedItems().stream().findFirst().ifPresent(model -> {
 			QueryParameters parameters =
 					new QueryParameters(Map.of("id", List.of("" + model.getId()), "duplicate", List.of("true")));
-			getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
+			getUI().ifPresent(ui -> ui.navigate(TeamMaintenanceView.URL, parameters));
 		});
 	}
 
@@ -283,7 +268,7 @@ public class TaskPageView extends Scroller implements BeforeEnterObserver, HasUr
 		session.setParameter(PARAMETER_FILTER, textFieldFilter.getValue());
 		grid.getSelectedItems().stream().findFirst().ifPresent(model -> {
 			QueryParameters parameters = new QueryParameters(Map.of("id", List.of("" + model.getId())));
-			getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
+			getUI().ifPresent(ui -> ui.navigate(TeamMaintenanceView.URL, parameters));
 		});
 	}
 

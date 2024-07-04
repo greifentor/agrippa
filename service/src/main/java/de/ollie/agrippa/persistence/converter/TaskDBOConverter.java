@@ -21,6 +21,7 @@ import de.ollie.agrippa.core.model.Task;
 @RequiredArgsConstructor
 public class TaskDBOConverter implements ToModelConverter<Task, TaskDBO> {
 
+	private final TeamDBOConverter teamDBOConverter;
 	private final UserDBOConverter userDBOConverter;
 	private final TaskStatusDBOConverter taskStatusDBOConverter;
 	private final ProjectDBOConverter projectDBOConverter;
@@ -34,6 +35,7 @@ public class TaskDBOConverter implements ToModelConverter<Task, TaskDBO> {
 		return new TaskDBO()
 				.setId(model.getId())
 				.setProject(projectDBOConverter.toDBO(model.getProject()))
+				.setTeam(teamDBOConverter.toDBO(model.getTeam()))
 				.setUser(userDBOConverter.toDBO(model.getUser()))
 				.setDescription(model.getDescription())
 				.setTaskStatus(taskStatusDBOConverter.toDBO(model.getTaskStatus()))
@@ -57,6 +59,7 @@ public class TaskDBOConverter implements ToModelConverter<Task, TaskDBO> {
 		return new Task()
 				.setId(dbo.getId())
 				.setProject(projectDBOConverter.toModel(dbo.getProject()))
+				.setTeam(teamDBOConverter.toModel(dbo.getTeam()))
 				.setUser(userDBOConverter.toModel(dbo.getUser()))
 				.setDescription(dbo.getDescription())
 				.setTaskStatus(taskStatusDBOConverter.toModel(dbo.getTaskStatus()))

@@ -26,6 +26,9 @@ public class TaskMasterDataGridFieldRenderer implements MasterDataGridFieldRende
 
 	@Override
 	public Object getHeaderString(String fieldName, Task model) {
+		if (Task.TEAM.equals(fieldName)) {
+			return model.getTeam() != null ? model.getTeam().getTitle() : "-";
+		}
 		if (Task.PROJECT.equals(fieldName)) {
 			return model.getProject() != null ? model.getProject().getTitle() : "-";
 		}
@@ -37,6 +40,9 @@ public class TaskMasterDataGridFieldRenderer implements MasterDataGridFieldRende
 
 	@Override
 	public boolean hasRenderingFor(String fieldName) {
+		if (Task.TEAM.equals(fieldName)) {
+			return true;
+		}
 		if (Task.PROJECT.equals(fieldName)) {
 			return true;
 		}

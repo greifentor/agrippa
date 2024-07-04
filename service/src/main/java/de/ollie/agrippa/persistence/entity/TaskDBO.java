@@ -44,6 +44,9 @@ public class TaskDBO {
 	@JoinColumn(name = "PROJECT", nullable = false, referencedColumnName = "ID")
 	@ManyToOne(fetch = FetchType.EAGER)
 	private ProjectDBO project;
+	@JoinColumn(name = "TEAM", referencedColumnName = "ID")
+	@ManyToOne(fetch = FetchType.EAGER)
+	private TeamDBO team;
 	@JoinColumn(name = "USER", nullable = false, referencedColumnName = "ID")
 	@ManyToOne(fetch = FetchType.EAGER)
 	private UserDBO user;

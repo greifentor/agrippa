@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.ollie.agrippa.core.service.ProjectService;
 import de.ollie.agrippa.core.service.TaskService;
+import de.ollie.agrippa.core.service.TeamService;
 import de.ollie.agrippa.core.service.UserService;
 
 import lombok.Generated;
@@ -25,6 +26,8 @@ public class ServiceProvider {
 	private ProjectService projectService;
 	@Autowired(required = false)
 	private TaskService taskService;
+	@Autowired(required = false)
+	private TeamService teamService;
 	@Autowired(required = false)
 	private UserService userService;
 
