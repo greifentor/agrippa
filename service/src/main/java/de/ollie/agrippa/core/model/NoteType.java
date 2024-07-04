@@ -11,6 +11,7 @@ import lombok.Generated;
 public enum NoteType {
 
 	CALL,
+	CHAT,
 	LINK,
 	NOTE;
 

@@ -32,7 +32,8 @@ public class NoteDBOConverter implements ToModelConverter<Note, NoteDBO> {
 				.setCreationDate(model.getCreationDate())
 				.setDescription(model.getDescription())
 				.setTitle(model.getTitle())
-				.setType(noteTypeDBOConverter.toDBO(model.getType()));
+				.setType(noteTypeDBOConverter.toDBO(model.getType()))
+				.setUrl(model.getUrl());
 	}
 
 	public List<NoteDBO> toDBO(List<Note> models) {
@@ -52,7 +53,8 @@ public class NoteDBOConverter implements ToModelConverter<Note, NoteDBO> {
 				.setCreationDate(dbo.getCreationDate())
 				.setDescription(dbo.getDescription())
 				.setTitle(dbo.getTitle())
-				.setType(noteTypeDBOConverter.toModel(dbo.getType()));
+				.setType(noteTypeDBOConverter.toModel(dbo.getType()))
+				.setUrl(dbo.getUrl());
 	}
 
 	@Override

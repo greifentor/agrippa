@@ -21,12 +21,14 @@ public abstract class GeneratedNote<T extends Note> {
 	public static final String DESCRIPTION = "DESCRIPTION";
 	public static final String TITLE = "TITLE";
 	public static final String TYPE = "TYPE";
+	public static final String URL = "URL";
 
 	private long id;
 	private LocalDateTime creationDate = LocalDateTime.now();
 	private String description;
 	private String title;
 	private NoteType type = NoteType.NOTE;
+	private String url;
 
 	protected abstract T self();
 
@@ -52,6 +54,11 @@ public abstract class GeneratedNote<T extends Note> {
 
 	public T setType(NoteType type) {
 		this.type = type;
+		return self();
+	}
+
+	public T setUrl(String url) {
+		this.url = url;
 		return self();
 	}
 

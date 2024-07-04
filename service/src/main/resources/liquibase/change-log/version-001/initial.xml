@@ -120,4 +120,10 @@
 				<constraints nullable="false" />
 			</column>
 		</addColumn>
-	</changeSet></databaseChangeLog>
+	</changeSet>
+	<changeSet author="dm-comp" id="Add-Field-URL-to-Table-NOTE" runInTransaction="true" failOnError="true">
+		<addColumn tableName="NOTE">
+			<column name="URL" type="VARCHAR(1000)" />
+		</addColumn>
+	</changeSet>
+</databaseChangeLog>

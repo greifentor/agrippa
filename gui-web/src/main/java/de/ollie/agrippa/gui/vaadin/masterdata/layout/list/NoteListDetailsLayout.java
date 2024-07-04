@@ -60,6 +60,7 @@ public class NoteListDetailsLayout extends VerticalLayout {
 				Note mmbr = grid.getSelectedItems().toArray(new Note[0])[0];
 				mmbr.setTitle(toEdit.getTitle());
 				mmbr.setCreationDate(toEdit.getCreationDate());
+				mmbr.setUrl(toEdit.getUrl());
 				mmbr.setType(toEdit.getType());
 				mmbr.setDescription(toEdit.getDescription());
 				grid.setItems(model.getNotes());
@@ -86,6 +87,14 @@ public class NoteListDetailsLayout extends VerticalLayout {
 						resourceManager
 								.getLocalizedString(
 										"NoteListDetailsLayout.grid.header.creationdate.label",
+										session.getLocalization()))
+				.setSortable(true);
+		grid
+				.addColumn(model -> getCellString("URL", model, () -> model.getUrl()))
+				.setHeader(
+						resourceManager
+								.getLocalizedString(
+										"NoteListDetailsLayout.grid.header.url.label",
 										session.getLocalization()))
 				.setSortable(true);
 		grid

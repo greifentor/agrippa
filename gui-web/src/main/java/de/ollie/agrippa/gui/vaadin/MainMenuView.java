@@ -28,6 +28,8 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 
+import de.ollie.agrippa.core.model.Note;
+import de.ollie.agrippa.core.model.NoteType;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.TaskStatus;
 import de.ollie.agrippa.core.model.Todo;
@@ -70,9 +72,20 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 			return getTodo().getStatus().name() + " (" + getTask().getTaskStatus() + ")";
 		}
 
-		String getPriorityStr() {
-			return "(" + getTodo().getPriority().ordinal() + ") " + getTodo().getPriority().name();
-		}
+        String getPriorityStr() {
+            return "(" + getTodo().getPriority().ordinal() + ") " + getTodo().getPriority().name();
+        }
+
+        List<Note> getLinkNotes() {
+            return getTask().getNotes()
+                    .stream()
+                    .filter(n -> (n.getType() == NoteType.LINK) && (n.getUrl() != null))
+                    .collect(Collectors.toList());
+        }
+
+        String getLinksString() {
+            return getLinkNotes().stream().map(Note::getUrl).reduce((s0, s1) -> s0 + "," + s1).orElse("");
+        }
 	}
 
 	public static final String URL = "agrippa/menu";
@@ -93,7 +106,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	private TaskTodoDataFilter filter;
 	private Column<TaskTodoData> priorityColumn;
 	private Column<TaskTodoData> projectTitleColumn;
-	private Column<TaskTodoData> taskTitleColumn;
+    private Column<TaskTodoData> taskLinksColumn;
+    private Column<TaskTodoData> taskTitleColumn;
 	private Column<TaskTodoData> todoTitleColumn;
 	private Column<TaskTodoData> todoAndTaskStatusColumn;
 
@@ -153,11 +167,12 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		layout.setPadding(true);
 		layout.setSizeFull();
 		grid = new Grid<>();
-		todoAndTaskStatusColumn = addColumn(grid, ttd -> ttd.getTodoAndTaskStatus(), 0, "10%");
-		priorityColumn = addColumn(grid, ttd -> ttd.getPriorityStr(), 1, "10%");
-		projectTitleColumn = addColumn(grid, ttd -> ttd.getTask().getProject().getTitle(), 2, "20%");
-		taskTitleColumn = addColumn0(grid, ttd -> createLabel(ttd.getTask().getTitle()), 3, "20%");
-		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 4, "40%");
+        todoAndTaskStatusColumn = addColumn(grid, ttd -> ttd.getTodoAndTaskStatus(), 0, "7%");
+        priorityColumn = addColumn(grid, ttd -> ttd.getPriorityStr(), 1, "7%");
+        projectTitleColumn = addColumn(grid, ttd -> ttd.getTask().getProject().getTitle(), 2, "15%");
+        taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 3, "20%");
+        taskLinksColumn = addColumn0(grid, ttd -> createLabel(getLinksAsHTML(ttd)), 4, "11%");
+        todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 5, "40%");
 		updateGrid();
 		grid.setAllRowsVisible(true);
 		grid.setWidthFull();
@@ -166,6 +181,14 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		layout.add(grid);
 		return layout;
 	}
+
+    private String getLinksAsHTML(TaskTodoData ttd) {
+        return ttd.getLinkNotes()
+                .stream()
+                .map(n -> "<A HREF=\"" + n.getUrl() + "\">" + n.getTitle() + "</A>")
+                .reduce((s0, s1) -> s0 + ", " + s1)
+                .orElse("");
+    }
 
 	private Component createLabel(String s) {
 		Label label = new Label();
@@ -192,7 +215,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		HeaderRow headerRow = grid.getHeaderRows().size() < 2 ? grid.appendHeaderRow() : grid.getHeaderRows().get(1);
 		headerRow.getCell(priorityColumn).setComponent(createFilterHeader("Priority", filter::setTodoPriority));
 		headerRow.getCell(projectTitleColumn).setComponent(createFilterHeader("Project", filter::setProjectTitle));
-		headerRow.getCell(taskTitleColumn).setComponent(createFilterHeader("Task", filter::setTaskTitle));
+        headerRow.getCell(taskTitleColumn).setComponent(createFilterHeader("Task", filter::setTaskTitle));
+        headerRow.getCell(taskLinksColumn).setComponent(createFilterHeader("Links", filter::setTaskLinks));
 		headerRow
 				.getCell(todoAndTaskStatusColumn)
 				.setComponent(createFilterHeader("Name", filter::setTodoAndTaskStatus));
@@ -265,8 +289,9 @@ class TaskTodoDataFilter {
 	private GridListDataView<TaskTodoData> dataView;
 
 	private String projectTitle;
+    private String taskLinks;
 	private String taskTitle;
-	private String todoTitle;
+    private String todoTitle;
 	private String todoAndTaskStatus;
 	private String todoPriorityStr;
 
@@ -284,10 +309,15 @@ class TaskTodoDataFilter {
 		this.dataView.refreshAll();
 	}
 
-	public void setTaskTitle(String taskTitle) {
-		this.taskTitle = taskTitle;
-		this.dataView.refreshAll();
-	}
+    public void setTaskTitle(String taskTitle) {
+        this.taskTitle = taskTitle;
+        this.dataView.refreshAll();
+    }
+
+    public void setTaskLinks(String taskLinks) {
+        this.taskLinks = taskLinks;
+        this.dataView.refreshAll();
+    }
 
 	public void setTodoTitle(String todoTitle) {
 		this.todoTitle = todoTitle;
@@ -306,12 +336,14 @@ class TaskTodoDataFilter {
 
 	public boolean test(TaskTodoData taskTodoData) {
 		boolean matchesProjectTitle = matches(taskTodoData.getTask().getProject().getTitle(), projectTitle);
-		boolean matchesTaskTitle = matches(taskTodoData.getTask().getTitle(), taskTitle);
+        boolean matchesTaskLinks = matches(taskTodoData.getLinksString(), taskLinks);
+        boolean matchesTaskTitle = matches(taskTodoData.getTask().getTitle(), taskTitle);
 		boolean matchesTodoTitle = matches(taskTodoData.getTodo().getTitle(), todoTitle);
 		boolean matchesTodoAndTaskStatus = matches(taskTodoData.getTodoAndTaskStatus(), todoAndTaskStatus);
 		boolean matchesTodoPriority = matches(taskTodoData.getPriorityStr(), todoPriorityStr);
 
-		return matchesProjectTitle && matchesTaskTitle && matchesTodoTitle && matchesTodoAndTaskStatus
+        return matchesProjectTitle && matchesTaskLinks && matchesTaskTitle && matchesTodoTitle
+                && matchesTodoAndTaskStatus
 				&& matchesTodoPriority;
 	}
 

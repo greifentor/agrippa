@@ -43,5 +43,7 @@ public class NoteDBO {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "TYPE", nullable = false)
 	private NoteTypeDBO type;
+	@Column(name = "URL")
+	private String url;
 
 }

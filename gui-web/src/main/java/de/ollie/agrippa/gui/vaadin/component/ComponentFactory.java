@@ -248,7 +248,10 @@ public class ComponentFactory {
 
     public DateTimePicker createDateTimePicker(String resourceId, LocalizationSO localization, LocalDateTime timestamp,
             ValueChangeListener<ComponentValueChangeEvent<DateTimePicker, LocalDateTime>> listener) {
-        return new DateTimePicker(resourceManager.getLocalizedString(resourceId, localization), timestamp, listener);
+        DateTimePicker dtp = new DateTimePicker(
+                resourceManager.getLocalizedString(resourceId, localization), timestamp, listener);
+        dtp.setWidthFull();
+        return dtp;
     }
 
 }

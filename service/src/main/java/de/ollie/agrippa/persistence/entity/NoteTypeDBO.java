@@ -11,6 +11,7 @@ import lombok.Generated;
 public enum NoteTypeDBO {
 
 	CALL,
+	CHAT,
 	LINK,
 	NOTE;
 

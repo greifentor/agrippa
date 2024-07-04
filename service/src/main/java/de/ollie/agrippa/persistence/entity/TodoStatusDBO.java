@@ -12,6 +12,7 @@ public enum TodoStatusDBO {
 
 	OPEN,
 	REQUEST,
-	SOLVED;
+	SOLVED,
+	WIP;
 
 }

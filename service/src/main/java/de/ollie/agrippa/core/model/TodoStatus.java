@@ -12,6 +12,7 @@ public enum TodoStatus {
 
 	OPEN,
 	REQUEST,
-	SOLVED;
+	SOLVED,
+	WIP;
 
 }
