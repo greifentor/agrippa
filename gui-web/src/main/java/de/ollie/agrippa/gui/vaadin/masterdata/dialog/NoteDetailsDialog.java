@@ -38,6 +38,7 @@ public class NoteDetailsDialog extends Dialog {
 	private Button buttonSave;
 	private TextField textFieldTitle;
 	private DateTimePicker dateTimePickerCreationDate;
+	private TextField textFieldUrl;
 	private ComboBox<NoteType> comboBoxType;
 	private TextArea textAreaDescription;
 	private VerticalLayout mainLayout;
@@ -56,6 +57,7 @@ public class NoteDetailsDialog extends Dialog {
 		if (model != null) {
 			this.model.setTitle(model.getTitle());
 			this.model.setCreationDate(model.getCreationDate());
+			this.model.setUrl(model.getUrl());
 			this.model.setType(model.getType());
 			this.model.setDescription(model.getDescription());
 		}
@@ -86,6 +88,11 @@ public class NoteDetailsDialog extends Dialog {
 			model.setCreationDate(event.getValue());
 			updateSaveButton();
 		});
+		textFieldUrl = componentFactory.createTextField("NoteDetailsLayout.field.url.label", model.getUrl(), session);
+		textFieldUrl.addValueChangeListener(event -> {
+			model.setUrl(event.getValue());
+			updateSaveButton();
+		});
 		comboBoxType = componentFactory.createComboBox("NoteDetailsLayout.field.type.label", model.getType(), NoteType.values(), componentFactory.getNoteTypeItemLabelGenerator(), session);
 		comboBoxType.addValueChangeListener(event -> {
 			model.setType(event.getValue());
@@ -99,6 +106,7 @@ public class NoteDetailsDialog extends Dialog {
 		mainLayout.add(
 				textFieldTitle,
 				dateTimePickerCreationDate,
+				textFieldUrl,
 				comboBoxType,
 				textAreaDescription
 		);
