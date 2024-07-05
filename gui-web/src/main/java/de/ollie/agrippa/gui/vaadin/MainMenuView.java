@@ -1,6 +1,7 @@
 package de.ollie.agrippa.gui.vaadin;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -86,7 +87,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		}
 
 		String getLinksString() {
-			return getLinkNotes().stream().map(Note::getUrl).reduce((s0, s1) -> s0 + "," + s1).orElse("");
+            return getLinkNotes().stream().map(Note::getUrl).reduce((s0, s1) -> s0 + "," + s1).orElse("-");
 		}
 	}
 
@@ -180,7 +181,11 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 						"9%");
 		projectTitleColumn = addColumn(grid, ttd -> ttd.getTask().getProject().getTitle(), 3, "14%");
 		taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 4, "18%");
-		taskLinksColumn = addColumn0(grid, ttd -> createLabel(getLinksAsHTML(ttd)), 5, "10%");
+        taskLinksColumn = addColumn0(grid,
+                ttd -> createLabel(getLinksAsHTML(ttd)),
+                5,
+                "10%",
+                (ttd0, ttd1) -> ttd0.getLinksString().compareTo(ttd1.getLinksString()));
 		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "35%");
 		updateGrid();
 		grid.setAllRowsVisible(true);
@@ -248,7 +253,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	}
 
 	private Column<TaskTodoData> addColumn0(Grid<TaskTodoData> grid,
-			SerializableFunction<TaskTodoData, Component> renderer, int columnNr, String width) {
+            SerializableFunction<TaskTodoData, Component> renderer, int columnNr, String width,
+            Comparator<TaskTodoData> comparator) {
 		return grid
 				.addColumn(new ComponentRenderer<Component, TaskTodoData>(renderer))
 				.setHeader(
@@ -257,7 +263,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 										"MainMenuView.gridTaskTodos.column." + columnNr + ".label",
 										session.getLocalization()))
 				.setSortable(true)
-				.setWidth(width);
+                .setComparator(comparator)
+                .setWidth(width);
 	}
 
 	private void addTodo(List<TaskTodoData> l, Task task) {
