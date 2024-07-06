@@ -31,13 +31,12 @@ public class ButtonFactory {
 	private final ButtonFactoryConfiguration buttonFactoryConfiguration;
 
 	public Button createButton(String text) {
-		Button button =
-				new Button(text)
-						.setBackgroundColor("white")
-						.setBorder("solid 1px")
-						.setBorderColor(buttonFactoryConfiguration.getButtonEnabledBorderColor())
-						.setColor("black")
-						.setBackgroundImage(buttonFactoryConfiguration.getButtonEnabledBackgroundFileName());
+		Button button = new Button(text)
+				.setBackgroundColor("white")
+				.setBorder("solid 1px")
+				.setBorderColor(buttonFactoryConfiguration.getButtonEnabledBorderColor())
+				.setColor("black")
+				.setBackgroundImage(buttonFactoryConfiguration.getButtonEnabledBackgroundFileName());
 		return button;
 	}
 
@@ -46,8 +45,8 @@ public class ButtonFactory {
 		return createResourcedButton(resourceManager, "commons.button.add.text", action, sessionData);
 	}
 
-	public Button createBackButton(ResourceManager resourceManager, Supplier<Optional<UI>> uiSupplier, String urlBack,
-			SessionData sessionData) {
+	public Button createBackButton(ResourceManager resourceManager, Supplier<Optional<UI>> uiSupplier,
+			String urlBack, SessionData sessionData) {
 		Button buttonBack =
 				createButton(
 						resourceManager.getLocalizedString("commons.button.back.text", sessionData.getLocalization()));
