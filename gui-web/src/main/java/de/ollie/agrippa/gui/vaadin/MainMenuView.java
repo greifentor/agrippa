@@ -278,16 +278,20 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	private Column<TaskTodoData> addColumnWithComponent(Grid<TaskTodoData> grid,
 			SerializableFunction<TaskTodoData, Component> renderer, int columnNr, String width,
 			Comparator<TaskTodoData> comparator, boolean sortable) {
-		return grid
-				.addColumn(new ComponentRenderer<Component, TaskTodoData>(renderer))
-				.setHeader(
-						resourceManager
-								.getLocalizedString(
-										"MainMenuView.gridTaskTodos.column." + columnNr + ".label",
-										session.getLocalization()))
-				.setSortable(sortable)
-				.setComparator(comparator)
-				.setWidth(width);
+		Column<TaskTodoData> column =
+				grid
+						.addColumn(new ComponentRenderer<Component, TaskTodoData>(renderer))
+						.setHeader(
+								resourceManager
+										.getLocalizedString(
+												"MainMenuView.gridTaskTodos.column." + columnNr + ".label",
+												session.getLocalization()))
+						.setSortable(sortable)
+						.setWidth(width);
+		if (comparator != null) {
+			column.setComparator(comparator);
+		}
+		return column;
 	}
 
 	private void addTodo(List<TaskTodoData> l, Task task) {
