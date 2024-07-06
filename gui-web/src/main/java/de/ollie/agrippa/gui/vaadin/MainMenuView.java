@@ -2,6 +2,7 @@ package de.ollie.agrippa.gui.vaadin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 
 import de.ollie.agrippa.core.model.Note;
@@ -48,6 +50,7 @@ import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
 import de.ollie.agrippa.gui.vaadin.component.TextField;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataView;
+import de.ollie.agrippa.gui.vaadin.masterdata.TaskMaintenanceView;
 import de.ollie.agrippa.gui.vaadin.masterdata.dialog.TodoDetailsDialog;
 import lombok.AllArgsConstructor;
 import lombok.Generated;
@@ -109,6 +112,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	private Column<TaskTodoData> priorityColumn;
 	private Column<TaskTodoData> projectTitleColumn;
 	private Column<TaskTodoData> taskLinksColumn;
+	private Column<TaskTodoData> taskButtonColumn;
 	private Column<TaskTodoData> taskTitleColumn;
 	private Column<TaskTodoData> teamTitleColumn;
 	private Column<TaskTodoData> todoTitleColumn;
@@ -180,8 +184,9 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 						"9%");
 		projectTitleColumn = addColumn(grid, ttd -> ttd.getTask().getProject().getTitle(), 3, "14%");
 		taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 4, "18%");
-		taskLinksColumn = addColumn0(grid, ttd -> createLabel(getLinksAsHTML(ttd)), 5, "10%");
-		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "35%");
+		taskLinksColumn = addColumnWithComponent(grid, ttd -> createLabel(getLinksAsHTML(ttd)), 5, "10%", true);
+		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "30%");
+		addColumnWithComponent(grid, ttd -> createTaskButton(ttd), 7, "5%", false);
 		updateGrid();
 		grid.setAllRowsVisible(true);
 		grid.setWidthFull();
@@ -204,6 +209,22 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		Label label = new Label();
 		label.getElement().setProperty("innerHTML", s);
 		return label;
+	}
+
+	private Button createTaskButton(TaskTodoData ttd) {
+		Button b =
+				componentFactory
+						.createButton(
+								resourceManager
+										.getLocalizedString(
+												"MainMenuView.gridTaskTodos.column.task.button.label",
+												session.getLocalization()));
+		b.addClickListener(e -> {
+			QueryParameters parameters = new QueryParameters(Map.of("id", List.of("" + ttd.getTask().getId())));
+			session.addReturnUrl(MainMenuView.URL);
+			getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
+		});
+		return b;
 	}
 
 	private void updateGrid() {
@@ -247,8 +268,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 				.setWidth(width);
 	}
 
-	private Column<TaskTodoData> addColumn0(Grid<TaskTodoData> grid,
-			SerializableFunction<TaskTodoData, Component> renderer, int columnNr, String width) {
+	private Column<TaskTodoData> addColumnWithComponent(Grid<TaskTodoData> grid,
+			SerializableFunction<TaskTodoData, Component> renderer, int columnNr, String width, boolean sortable) {
 		return grid
 				.addColumn(new ComponentRenderer<Component, TaskTodoData>(renderer))
 				.setHeader(
@@ -256,7 +277,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 								.getLocalizedString(
 										"MainMenuView.gridTaskTodos.column." + columnNr + ".label",
 										session.getLocalization()))
-				.setSortable(true)
+				.setSortable(sortable)
 				.setWidth(width);
 	}
 
