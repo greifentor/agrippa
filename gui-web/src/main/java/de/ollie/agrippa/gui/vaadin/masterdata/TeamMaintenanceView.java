@@ -9,11 +9,13 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 
 import de.ollie.agrippa.core.model.Team;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
+import de.ollie.agrippa.gui.SessionData.ReturnUrlData;
 import de.ollie.agrippa.gui.vaadin.UserAuthorizationChecker;
 import de.ollie.agrippa.gui.vaadin.component.AbstractMasterDataBaseLayout;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
@@ -107,7 +109,7 @@ public class TeamMaintenanceView extends AbstractMasterDataBaseLayout implements
 										.createBackButton(
 												resourceManager,
 												this::getUI,
-												TeamPageView.URL,
+												session.getReturnUrl().orElse(new ReturnUrlData(TeamPageView.URL)),
 												session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
 								resourceManager.getLocalizedString("TeamMaintenanceView.header.prefix.label", session.getLocalization()) + getHeaderSuffix(model),
@@ -140,7 +142,12 @@ public class TeamMaintenanceView extends AbstractMasterDataBaseLayout implements
 
 	@Override
 	public void save(Object model) {
-		getUI().ifPresent(ui -> ui.navigate(TeamPageView.URL));
+		navigateBack();
+	}
+
+	private void navigateBack() {
+		ReturnUrlData urlBack = session.getReturnUrl().orElse(new ReturnUrlData(TeamPageView.URL));
+		getUI().ifPresent(ui -> ui.navigate(urlBack.getUrl(), new QueryParameters(urlBack.getParameters())));
 	}
 
 	@Override
@@ -151,7 +158,7 @@ public class TeamMaintenanceView extends AbstractMasterDataBaseLayout implements
 	@Override
 	public void remove() {
 		serviceProvider.getTeamService().delete(model);
-		getUI().ifPresent(ui -> ui.navigate(TeamPageView.URL));
+		navigateBack();
 	}
 
 }

@@ -9,9 +9,12 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 
 import de.ollie.agrippa.core.model.Task;
+import de.ollie.agrippa.core.service.ProjectService;
+import de.ollie.agrippa.core.service.TeamService;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.SessionData.ReturnUrlData;
@@ -77,10 +80,9 @@ public class TaskMaintenanceView extends AbstractMasterDataBaseLayout implements
 
 	@Override
 	public void doSetParameter(BeforeEvent event) {
-		long id =
-				parametersMap.containsKey("id") && (parametersMap.get("id").size() > 0)
-						? Long.parseLong(parametersMap.get("id").get(0))
-						: -1;
+		long id = parametersMap.containsKey("id") && (parametersMap.get("id").size() > 0)
+				? Long.parseLong(parametersMap.get("id").get(0))
+				: -1;
 		model = serviceProvider.getTaskService().findById(id).orElse(createNewModel());
 		if (parametersMap.containsKey("duplicate") && "true".equals(parametersMap.get("duplicate").get(0))) {
 			model.setId(-1);
@@ -106,36 +108,25 @@ public class TaskMaintenanceView extends AbstractMasterDataBaseLayout implements
 		add(
 				new HeaderLayout(
 						buttonFactory
-								.createBackButton(
-										resourceManager,
-										this::getUI,
-										session.getReturnUrl().orElse(new ReturnUrlData(TaskPageView.URL)),
-										session),
+										.createBackButton(
+												resourceManager,
+												this::getUI,
+												session.getReturnUrl().orElse(new ReturnUrlData(TaskPageView.URL)),
+												session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
-						resourceManager
-								.getLocalizedString(
-										"TaskMaintenanceView.header.prefix.label",
-										session.getLocalization())
-								+ getHeaderSuffix(model),
-						HeaderLayoutMode.PLAIN),
+								resourceManager.getLocalizedString("TaskMaintenanceView.header.prefix.label", session.getLocalization()) + getHeaderSuffix(model),
+								HeaderLayoutMode.PLAIN),
 				getDetailsLayout(model));
 	}
 
 	private String getHeaderSuffix(Task model) {
-		return maintenanceViewRenderer != null ? maintenanceViewRenderer.getHeaderSuffix(model) : "" + model.getTitle();
+		return maintenanceViewRenderer != null
+				? maintenanceViewRenderer.getHeaderSuffix(model)
+				: "" + model.getTitle();
 	}
 
 	private AbstractMasterDataBaseLayout getDetailsLayout(Task model) {
-		return new TaskDetailsLayout(
-				buttonFactory,
-				componentFactory,
-				model,
-				serviceProvider,
-				guiConfiguration,
-				resourceManager,
-				session,
-				this,
-				comboBoxItemLabelGenerator);
+		return new TaskDetailsLayout(buttonFactory, componentFactory, model, serviceProvider, guiConfiguration, resourceManager, session, this, comboBoxItemLabelGenerator);
 	}
 
 	@Override
@@ -153,7 +144,12 @@ public class TaskMaintenanceView extends AbstractMasterDataBaseLayout implements
 
 	@Override
 	public void save(Object model) {
-		getUI().ifPresent(ui -> ui.navigate(TaskPageView.URL));
+		navigateBack();
+	}
+
+	private void navigateBack() {
+		ReturnUrlData urlBack = session.getReturnUrl().orElse(new ReturnUrlData(TaskPageView.URL));
+		getUI().ifPresent(ui -> ui.navigate(urlBack.getUrl(), new QueryParameters(urlBack.getParameters())));
 	}
 
 	@Override
@@ -164,7 +160,7 @@ public class TaskMaintenanceView extends AbstractMasterDataBaseLayout implements
 	@Override
 	public void remove() {
 		serviceProvider.getTaskService().delete(model);
-		getUI().ifPresent(ui -> ui.navigate(TaskPageView.URL));
+		navigateBack();
 	}
 
 }

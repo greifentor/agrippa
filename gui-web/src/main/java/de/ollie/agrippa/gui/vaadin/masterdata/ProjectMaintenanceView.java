@@ -9,11 +9,13 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 
 import de.ollie.agrippa.core.model.Project;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
+import de.ollie.agrippa.gui.SessionData.ReturnUrlData;
 import de.ollie.agrippa.gui.vaadin.UserAuthorizationChecker;
 import de.ollie.agrippa.gui.vaadin.component.AbstractMasterDataBaseLayout;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
@@ -107,7 +109,7 @@ public class ProjectMaintenanceView extends AbstractMasterDataBaseLayout impleme
 										.createBackButton(
 												resourceManager,
 												this::getUI,
-												ProjectPageView.URL,
+												session.getReturnUrl().orElse(new ReturnUrlData(ProjectPageView.URL)),
 												session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
 								resourceManager.getLocalizedString("ProjectMaintenanceView.header.prefix.label", session.getLocalization()) + getHeaderSuffix(model),
@@ -140,7 +142,12 @@ public class ProjectMaintenanceView extends AbstractMasterDataBaseLayout impleme
 
 	@Override
 	public void save(Object model) {
-		getUI().ifPresent(ui -> ui.navigate(ProjectPageView.URL));
+		navigateBack();
+	}
+
+	private void navigateBack() {
+		ReturnUrlData urlBack = session.getReturnUrl().orElse(new ReturnUrlData(ProjectPageView.URL));
+		getUI().ifPresent(ui -> ui.navigate(urlBack.getUrl(), new QueryParameters(urlBack.getParameters())));
 	}
 
 	@Override
@@ -151,7 +158,7 @@ public class ProjectMaintenanceView extends AbstractMasterDataBaseLayout impleme
 	@Override
 	public void remove() {
 		serviceProvider.getProjectService().delete(model);
-		getUI().ifPresent(ui -> ui.navigate(ProjectPageView.URL));
+		navigateBack();
 	}
 
 }
