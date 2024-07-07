@@ -23,20 +23,22 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.QueryParameters;
 
-import de.ollie.agrippa.core.model.Note;
 import de.ollie.agrippa.core.model.NoteType;
-import de.ollie.agrippa.core.model.Project;
-import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.TaskStatus;
-import de.ollie.agrippa.core.model.Todo;
 import de.ollie.agrippa.core.model.TodoPriority;
 import de.ollie.agrippa.core.model.TodoStatus;
+import de.ollie.agrippa.core.model.Note;
+import de.ollie.agrippa.core.model.Project;
+import de.ollie.agrippa.core.model.Task;
+import de.ollie.agrippa.core.model.Team;
+import de.ollie.agrippa.core.model.Todo;
 import de.ollie.agrippa.core.model.User;
 import de.ollie.agrippa.core.model.localization.LocalizationSO;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.ApplicationStartView;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGridFieldRenderer;
+
 import lombok.Generated;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +71,8 @@ public class ComponentFactory {
 	@Autowired(required = false)
 	private ItemLabelGenerator<Task> taskItemLabelGenerator;
 	@Autowired(required = false)
+	private ItemLabelGenerator<Team> teamItemLabelGenerator;
+	@Autowired(required = false)
 	private ItemLabelGenerator<User> userItemLabelGenerator;
 
 	@Autowired(required = false)
@@ -77,6 +81,8 @@ public class ComponentFactory {
 	private MasterDataGridFieldRenderer<Project> projectMasterDataGridFieldRenderer;
 	@Autowired(required = false)
 	private MasterDataGridFieldRenderer<Task> taskMasterDataGridFieldRenderer;
+	@Autowired(required = false)
+	private MasterDataGridFieldRenderer<Team> teamMasterDataGridFieldRenderer;
 	@Autowired(required = false)
 	private MasterDataGridFieldRenderer<Todo> todoMasterDataGridFieldRenderer;
 	@Autowired(required = false)
@@ -246,12 +252,12 @@ public class ComponentFactory {
 		return textArea;
 	}
 
-    public DateTimePicker createDateTimePicker(String resourceId, LocalizationSO localization, LocalDateTime timestamp,
-            ValueChangeListener<ComponentValueChangeEvent<DateTimePicker, LocalDateTime>> listener) {
-        DateTimePicker dtp = new DateTimePicker(
-                resourceManager.getLocalizedString(resourceId, localization), timestamp, listener);
-        dtp.setWidthFull();
-        return dtp;
-    }
+	public DateTimePicker createDateTimePicker(String resourceId, LocalizationSO localization, LocalDateTime timestamp,
+			ValueChangeListener<ComponentValueChangeEvent<DateTimePicker, LocalDateTime>> listener) {
+		DateTimePicker dtp = new DateTimePicker(
+				resourceManager.getLocalizedString(resourceId, localization), timestamp, listener);
+		dtp.setWidthFull();
+		return dtp;
+	}
 
 }
