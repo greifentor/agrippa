@@ -1,19 +1,21 @@
 package de.ollie.agrippa.gui.vaadin.masterdata.dialog;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
+import de.ollie.agrippa.gui.vaadin.component.Button;
 import de.ollie.agrippa.core.model.Note;
 import de.ollie.agrippa.core.model.NoteType;
 import de.ollie.agrippa.gui.SessionData;
-import de.ollie.agrippa.gui.vaadin.component.Button;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
 import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
+
 import lombok.Generated;
 
 /**
@@ -79,12 +81,7 @@ public class NoteDetailsDialog extends Dialog {
 			model.setTitle(event.getValue());
 			updateSaveButton();
 		});
-        dateTimePickerCreationDate = componentFactory.createDateTimePicker("NoteDetailsLayout.field.creationdate.label",
-                session.getLocalization(),
-                model.getCreationDate(),
-                event -> {
-                });
-		dateTimePickerCreationDate.addValueChangeListener(event -> {
+		dateTimePickerCreationDate = componentFactory.createDateTimePicker("NoteDetailsLayout.field.creationdate.label", session.getLocalization(), model.getCreationDate(), event -> {
 			model.setCreationDate(event.getValue());
 			updateSaveButton();
 		});
