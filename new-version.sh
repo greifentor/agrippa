@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo Setting Counter-WS project version to: $1
+echo Setting Agrippa project version to: $1
 
 mvn versions:set -DnewVersion=$1
 mvn versions:set -DnewVersion=$1
