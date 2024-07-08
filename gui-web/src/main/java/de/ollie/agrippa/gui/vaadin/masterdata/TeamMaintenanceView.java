@@ -78,9 +78,10 @@ public class TeamMaintenanceView extends AbstractMasterDataBaseLayout implements
 
 	@Override
 	public void doSetParameter(BeforeEvent event) {
-		long id = parametersMap.containsKey("id") && (parametersMap.get("id").size() > 0)
-				? Long.parseLong(parametersMap.get("id").get(0))
-				: -1;
+		long id =
+				parametersMap.containsKey("id") && (parametersMap.get("id").size() > 0)
+						? Long.parseLong(parametersMap.get("id").get(0))
+						: -1;
 		model = serviceProvider.getTeamService().findById(id).orElse(createNewModel());
 		if (parametersMap.containsKey("duplicate") && "true".equals(parametersMap.get("duplicate").get(0))) {
 			model.setId(-1);
@@ -106,25 +107,36 @@ public class TeamMaintenanceView extends AbstractMasterDataBaseLayout implements
 		add(
 				new HeaderLayout(
 						buttonFactory
-										.createBackButton(
-												resourceManager,
-												this::getUI,
-												session.getReturnUrl().orElse(new ReturnUrlData(TeamPageView.URL)),
-												session),
+								.createBackButton(
+										resourceManager,
+										this::getUI,
+										() -> session.getReturnUrl().orElse(new ReturnUrlData(TeamPageView.URL)),
+										session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
-								resourceManager.getLocalizedString("TeamMaintenanceView.header.prefix.label", session.getLocalization()) + getHeaderSuffix(model),
-								HeaderLayoutMode.PLAIN),
+						resourceManager
+								.getLocalizedString(
+										"TeamMaintenanceView.header.prefix.label",
+										session.getLocalization())
+								+ getHeaderSuffix(model),
+						HeaderLayoutMode.PLAIN),
 				getDetailsLayout(model));
 	}
 
 	private String getHeaderSuffix(Team model) {
-		return maintenanceViewRenderer != null
-				? maintenanceViewRenderer.getHeaderSuffix(model)
-				: "" + model.getTitle();
+		return maintenanceViewRenderer != null ? maintenanceViewRenderer.getHeaderSuffix(model) : "" + model.getTitle();
 	}
 
 	private AbstractMasterDataBaseLayout getDetailsLayout(Team model) {
-		return new TeamDetailsLayout(buttonFactory, componentFactory, model, serviceProvider, guiConfiguration, resourceManager, session, this, comboBoxItemLabelGenerator);
+		return new TeamDetailsLayout(
+				buttonFactory,
+				componentFactory,
+				model,
+				serviceProvider,
+				guiConfiguration,
+				resourceManager,
+				session,
+				this,
+				comboBoxItemLabelGenerator);
 	}
 
 	@Override

@@ -15,13 +15,12 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 
 import de.ollie.agrippa.core.model.localization.LocalizationSO;
 import de.ollie.agrippa.core.service.JWTService.AuthorizationData;
-import de.ollie.agrippa.gui.AccessChecker;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Generated;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * An object to hold data during the session.
@@ -37,6 +36,7 @@ public class SessionData {
 	@AllArgsConstructor
 	@EqualsAndHashCode
 	@Getter
+	@ToString
 	public static class ReturnUrlData {
 
 		public ReturnUrlData(String url) {
@@ -66,10 +66,13 @@ public class SessionData {
 		ensure(url != null, "url cannot be null!");
 		ensure(!url.isEmpty(), "url cannot be empty!");
 		ensure(parameters != null, "parameters cannot be null!");
+		System.out.println("#before: " + returnUrlDatas);
 		returnUrlDatas.push(new ReturnUrlData(url, parameters));
+		System.out.println("#after:  " + returnUrlDatas);
 	}
 
 	public Optional<ReturnUrlData> getReturnUrl() {
+		System.out.println("#get(b): " + returnUrlDatas);
 		return Optional.ofNullable(!returnUrlDatas.isEmpty() ? returnUrlDatas.pop() : null);
 	}
 
