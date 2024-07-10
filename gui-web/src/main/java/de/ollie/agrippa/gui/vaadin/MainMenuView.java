@@ -11,6 +11,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -18,7 +20,6 @@ import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
@@ -33,9 +34,12 @@ import com.vaadin.flow.router.Route;
 
 import de.ollie.agrippa.core.model.Note;
 import de.ollie.agrippa.core.model.NoteType;
+import de.ollie.agrippa.core.model.Project;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.TaskStatus;
+import de.ollie.agrippa.core.model.Team;
 import de.ollie.agrippa.core.model.Todo;
+import de.ollie.agrippa.core.model.TodoPriority;
 import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.service.TaskService;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
@@ -114,7 +118,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	private Column<TaskTodoData> projectTitleColumn;
 	private Column<TaskTodoData> taskLinksColumn;
 	private Column<TaskTodoData> taskTitleColumn;
-	private Column<TaskTodoData> teamTitleColumn;
+    private Column<TaskTodoData> teamColumn;
 	private Column<TaskTodoData> todoTitleColumn;
 	private Column<TaskTodoData> todoAndTaskStatusColumn;
 
@@ -176,7 +180,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		grid = new Grid<>();
 		todoAndTaskStatusColumn = addColumn(grid, ttd -> ttd.getTodoAndTaskStatus(), 0, "7%");
 		priorityColumn = addColumn(grid, ttd -> ttd.getPriorityStr(), 1, "7%");
-		teamTitleColumn =
+        teamColumn =
 				addColumn(
 						grid,
 						ttd -> (ttd.getTask().getTeam() != null ? ttd.getTask().getTeam().getTitle() : "-"),
@@ -239,7 +243,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		for (Task t : taskService
 				.findAll()
 				.stream()
-				.filter(t -> t.getTaskStatus() != TaskStatus.SOLVED)
+                .filter(t -> (t.getTaskStatus() != TaskStatus.REJECTED) && (t.getTaskStatus() != TaskStatus.SOLVED))
 				.collect(Collectors.toList())) {
 			addTodo(l, t);
 		}
@@ -251,15 +255,25 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		GridListDataView<TaskTodoData> dataView = grid.setItems(l);
 		filter = new TaskTodoDataFilter(dataView);
 		HeaderRow headerRow = grid.getHeaderRows().size() < 2 ? grid.appendHeaderRow() : grid.getHeaderRows().get(1);
-		headerRow.getCell(priorityColumn).setComponent(createFilterHeader("Priority", filter::setTodoPriority));
-		headerRow.getCell(projectTitleColumn).setComponent(createFilterHeader("Project", filter::setProjectTitle));
-		headerRow.getCell(teamTitleColumn).setComponent(createFilterHeader("Team", filter::setTeamTitle));
-		headerRow.getCell(taskTitleColumn).setComponent(createFilterHeader("Task", filter::setTaskTitle));
-		headerRow.getCell(taskLinksColumn).setComponent(createFilterHeader("Links", filter::setTaskLinks));
+        headerRow.getCell(priorityColumn)
+                .setComponent(createFilterHeader(filter::setTodoPriority,
+                        p -> resourceManager
+                                .getLocalizedString("TodoPriority." + p.name() + ".label"),
+                        TodoPriority.values()));
+        headerRow.getCell(projectTitleColumn)
+                .setComponent(createFilterHeader(filter::setProject,
+                        p -> p != null ? p.getTitle() : "",
+                        serviceProvider.getProjectService().findAll()));
+        headerRow.getCell(teamColumn)
+                .setComponent(createFilterHeader(filter::setTeam,
+                        t -> t != null ? t.getTitle() : "",
+                        serviceProvider.getTeamService().findAll()));
+        headerRow.getCell(taskTitleColumn).setComponent(createFilterHeader(filter::setTaskTitle));
+        headerRow.getCell(taskLinksColumn).setComponent(createFilterHeader(filter::setTaskLinks));
 		headerRow
 				.getCell(todoAndTaskStatusColumn)
-				.setComponent(createFilterHeader("Name", filter::setTodoAndTaskStatus));
-		headerRow.getCell(todoTitleColumn).setComponent(createFilterHeader("Todo", filter::setTodoTitle));
+                .setComponent(createFilterHeader(filter::setTodoAndTaskStatus));
+        headerRow.getCell(todoTitleColumn).setComponent(createFilterHeader(filter::setTodoTitle));
 	}
 
 	private Column<TaskTodoData> addColumn(Grid<TaskTodoData> grid, ValueProvider<TaskTodoData, ?> valueProvider,
@@ -298,7 +312,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		task
 				.getTodos()
 				.stream()
-				.filter(t -> t.getStatus() != TodoStatus.SOLVED)
+                .filter(t -> (t.getStatus() != TodoStatus.REJECTED) && (t.getStatus() != TodoStatus.SOLVED))
 				.forEach(t -> l.add(new TaskTodoData(task, t)));
 	}
 
@@ -306,16 +320,30 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		getUI().ifPresent(ui -> ui.navigate(MasterDataView.URL));
 	}
 
-	private static Component createFilterHeader(String labelText, Consumer<String> filterChangeConsumer) {
-		TextField textField = new TextField();
-		textField.setValueChangeMode(ValueChangeMode.EAGER);
-		textField.setClearButtonVisible(true);
-		textField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-		textField.setWidthFull();
-		textField.getStyle().set("max-width", "100%");
-		textField.addValueChangeListener(e -> filterChangeConsumer.accept(e.getValue()));
-		return textField;
-	}
+    private Component createFilterHeader(Consumer<String> filterChangeConsumer) {
+        TextField textField = new TextField();
+        textField.setValueChangeMode(ValueChangeMode.EAGER);
+        textField.setClearButtonVisible(true);
+        textField.setWidthFull();
+        textField.addValueChangeListener(e -> filterChangeConsumer.accept(e.getValue()));
+        return textField;
+    }
+
+    private <T> Component createFilterHeader(Consumer<T> filterChangeConsumer,
+            ItemLabelGenerator<T> renderer,
+            T... selectableObjects) {
+        return createFilterHeader(filterChangeConsumer, renderer, List.of(selectableObjects));
+    }
+
+    private <T> Component createFilterHeader(Consumer<T> filterChangeConsumer, ItemLabelGenerator<T> renderer,
+            List<T> selectableObjects) {
+        ComboBox<T> comboBox = new ComboBox<>(null, selectableObjects);
+        comboBox.setClearButtonVisible(true);
+        comboBox.setItemLabelGenerator(renderer);
+        comboBox.setWidthFull();
+        comboBox.addValueChangeListener(e -> filterChangeConsumer.accept(e.getValue()));
+        return comboBox;
+    }
 
 	private void edit(TaskTodoData ttd) {
 		new TodoDetailsDialog(componentFactory, masterDataGUIConfiguration, (t, b) -> {
@@ -333,13 +361,13 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 class TaskTodoDataFilter {
 	private GridListDataView<TaskTodoData> dataView;
 
-	private String projectTitle;
+    private Project project;
 	private String taskLinks;
 	private String taskTitle;
-	private String teamTitle;
+    private Team team;
 	private String todoTitle;
 	private String todoAndTaskStatus;
-	private String todoPriorityStr;
+    private TodoPriority todoPriority;
 
 	public TaskTodoDataFilter(GridListDataView<TaskTodoData> dataView) {
 		this.dataView = dataView;
@@ -350,8 +378,8 @@ class TaskTodoDataFilter {
 		this.dataView = dataView;
 	}
 
-	public void setProjectTitle(String projectTitle) {
-		this.projectTitle = projectTitle;
+    public void setProject(Project project) {
+        this.project = project;
 		this.dataView.refreshAll();
 	}
 
@@ -365,8 +393,8 @@ class TaskTodoDataFilter {
 		this.dataView.refreshAll();
 	}
 
-	public void setTeamTitle(String teamTitle) {
-		this.teamTitle = teamTitle;
+    public void setTeam(Team team) {
+        this.team = team;
 		this.dataView.refreshAll();
 	}
 
@@ -380,28 +408,32 @@ class TaskTodoDataFilter {
 		this.dataView.refreshAll();
 	}
 
-	public void setTodoPriority(String todoPriorityStr) {
-		this.todoPriorityStr = todoPriorityStr;
+    public void setTodoPriority(TodoPriority todoPriority) {
+        this.todoPriority = todoPriority;
 		this.dataView.refreshAll();
 	}
 
 	public boolean test(TaskTodoData taskTodoData) {
-		boolean matchesProjectTitle = matches(taskTodoData.getTask().getProject().getTitle(), projectTitle);
+        boolean matchesProject = matches(taskTodoData.getTask().getProject(), project);
 		boolean matchesTaskLinks = matches(taskTodoData.getLinksString(), taskLinks);
 		boolean matchesTaskTitle = matches(taskTodoData.getTask().getTitle(), taskTitle);
-		boolean matchesTeamTitle =
+        boolean matchesTeam =
 				matches(
-						(taskTodoData.getTask().getTeam() != null ? taskTodoData.getTask().getTeam().getTitle() : "-"),
-						teamTitle);
+                        (taskTodoData.getTask().getTeam() != null ? taskTodoData.getTask().getTeam() : null),
+                        team);
 		boolean matchesTodoTitle = matches(taskTodoData.getTodo().getTitle(), todoTitle);
 		boolean matchesTodoAndTaskStatus = matches(taskTodoData.getTodoAndTaskStatus(), todoAndTaskStatus);
-		boolean matchesTodoPriority = matches(taskTodoData.getPriorityStr(), todoPriorityStr);
+        boolean matchesTodoPriority = matches(taskTodoData.getTodo().getPriority(), todoPriority);
 
-		return matchesProjectTitle && matchesTaskLinks && matchesTaskTitle && matchesTeamTitle && matchesTodoTitle
+        return matchesProject && matchesTaskLinks && matchesTaskTitle && matchesTeam && matchesTodoTitle
 				&& matchesTodoAndTaskStatus && matchesTodoPriority;
 	}
 
-	private boolean matches(String value, String searchTerm) {
+    private <T> boolean matches(T value, T searchTerm) {
+        return searchTerm == null || searchTerm.equals(value);
+    }
+
+    private boolean matches(String value, String searchTerm) {
 		return searchTerm == null || searchTerm.isEmpty() || value.toLowerCase().contains(searchTerm.toLowerCase());
 	}
 }

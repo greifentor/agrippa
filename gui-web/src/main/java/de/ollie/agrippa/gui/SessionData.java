@@ -66,13 +66,10 @@ public class SessionData {
 		ensure(url != null, "url cannot be null!");
 		ensure(!url.isEmpty(), "url cannot be empty!");
 		ensure(parameters != null, "parameters cannot be null!");
-		System.out.println("#before: " + returnUrlDatas);
 		returnUrlDatas.push(new ReturnUrlData(url, parameters));
-		System.out.println("#after:  " + returnUrlDatas);
 	}
 
 	public Optional<ReturnUrlData> getReturnUrl() {
-		System.out.println("#get(b): " + returnUrlDatas);
 		return Optional.ofNullable(!returnUrlDatas.isEmpty() ? returnUrlDatas.pop() : null);
 	}
 
