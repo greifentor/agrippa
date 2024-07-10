@@ -10,9 +10,10 @@ import lombok.Generated;
 @Generated
 public enum TodoStatus {
 
+	WIP,
 	OPEN,
 	REQUEST,
 	SOLVED,
-	WIP;
+	REJECTED;
 
 }

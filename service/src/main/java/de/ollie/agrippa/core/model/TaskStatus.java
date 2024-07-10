@@ -14,6 +14,7 @@ public enum TaskStatus {
 	OPEN,
 	REQUEST,
 	ON_HOLD,
-	SOLVED;
+	SOLVED,
+	REJECTED;
 
 }
