@@ -43,6 +43,7 @@ import de.ollie.agrippa.core.model.TodoPriority;
 import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.service.TaskService;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
+import de.ollie.agrippa.gui.AccessGranter;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.MainMenuView.TaskTodoData;
 import de.ollie.agrippa.gui.vaadin.component.Button;
@@ -102,6 +103,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 
 	private static final Logger LOG = LogManager.getLogger(MainMenuView.class);
 
+    private final AccessGranter accessGranter;
 	private final ButtonFactory buttonFactory;
 	private final ComponentFactory componentFactory;
 	private final GUIConfiguration guiConfiguration;
@@ -129,6 +131,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+        accessGranter.grantAccess(session);
 		UserAuthorizationChecker.forwardToLoginOnNoUserSetForSession(session, beforeEnterEvent);
 		LOG.info("created");
 		setWidthFull();
