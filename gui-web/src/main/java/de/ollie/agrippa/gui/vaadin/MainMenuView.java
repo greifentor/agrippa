@@ -253,7 +253,13 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		l =
 				l
 						.stream()
-						.sorted((ttd0, ttd1) -> ttd0.getPriorityStr().compareTo(ttd1.getPriorityStr()))
+                        .sorted((ttd0, ttd1) -> {
+                            int i = ttd0.getPriorityStr().compareTo(ttd1.getPriorityStr());
+                            if (i == 0) {
+                                i = ttd0.getTodoAndTaskStatus().compareTo(ttd1.getTodoAndTaskStatus());
+                            }
+                            return i;
+                        })
 						.collect(Collectors.toList());
 		GridListDataView<TaskTodoData> dataView = grid.setItems(l);
 		filter = new TaskTodoDataFilter(dataView);
