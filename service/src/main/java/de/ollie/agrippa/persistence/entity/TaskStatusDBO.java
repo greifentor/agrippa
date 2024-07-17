@@ -14,6 +14,7 @@ public enum TaskStatusDBO {
 	OPEN,
 	REQUEST,
 	ON_HOLD,
-	SOLVED;
+	SOLVED,
+	REJECTED;
 
 }
