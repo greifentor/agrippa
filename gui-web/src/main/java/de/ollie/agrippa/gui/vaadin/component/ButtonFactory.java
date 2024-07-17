@@ -14,7 +14,6 @@ import com.vaadin.flow.router.QueryParameters;
 
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
-import de.ollie.agrippa.gui.SessionData.ReturnUrlData;
 import de.ollie.agrippa.gui.vaadin.ApplicationStartView;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +31,12 @@ public class ButtonFactory {
 	private final ButtonFactoryConfiguration buttonFactoryConfiguration;
 
 	public Button createButton(String text) {
-		Button button =
-				new Button(text)
-						.setBackgroundColor("white")
-						.setBorder("solid 1px")
-						.setBorderColor(buttonFactoryConfiguration.getButtonEnabledBorderColor())
-						.setColor("black")
-						.setBackgroundImage(buttonFactoryConfiguration.getButtonEnabledBackgroundFileName());
+		Button button = new Button(text)
+				.setBackgroundColor("white")
+				.setBorder("solid 1px")
+				.setBorderColor(buttonFactoryConfiguration.getButtonEnabledBorderColor())
+				.setColor("black")
+				.setBackgroundImage(buttonFactoryConfiguration.getButtonEnabledBackgroundFileName());
 		return button;
 	}
 
@@ -47,8 +45,8 @@ public class ButtonFactory {
 		return createResourcedButton(resourceManager, "commons.button.add.text", action, sessionData);
 	}
 
-	public Button createBackButton(ResourceManager resourceManager, Supplier<Optional<UI>> uiSupplier, String urlBack,
-			SessionData sessionData) {
+	public Button createBackButton(ResourceManager resourceManager, Supplier<Optional<UI>> uiSupplier,
+			String urlBack, SessionData sessionData) {
 		Button buttonBack =
 				createButton(
 						resourceManager.getLocalizedString("commons.button.back.text", sessionData.getLocalization()));
@@ -57,14 +55,19 @@ public class ButtonFactory {
 	}
 
 	public Button createBackButton(ResourceManager resourceManager, Supplier<Optional<UI>> uiSupplier,
-			Supplier<ReturnUrlData> urlBack, SessionData sessionData) {
+			SessionData.ReturnUrlData urlBack, SessionData sessionData) {
 		Button buttonBack =
 				createButton(
 						resourceManager.getLocalizedString("commons.button.back.text", sessionData.getLocalization()));
-		buttonBack.addClickListener(event -> uiSupplier.get().ifPresent(ui -> {
-			ReturnUrlData rud = urlBack.get();
-			ui.navigate(rud.getUrl(), new QueryParameters(rud.getParameters()));
-		}));
+		buttonBack
+				.addClickListener(
+						event -> uiSupplier
+								.get()
+								.ifPresent(
+										ui -> ui
+												.navigate(
+														urlBack.getUrl(),
+														new QueryParameters(urlBack.getParameters()))));
 		return buttonBack;
 	}
 
