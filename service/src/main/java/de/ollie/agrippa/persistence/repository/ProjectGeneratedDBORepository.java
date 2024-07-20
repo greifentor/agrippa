@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import de.ollie.agrippa.persistence.entity.ProjectDBO;
 import lombok.Generated;
+import java.util.Optional;
 
 /**
  * A generated JPA repository for projects.
@@ -14,4 +15,7 @@ import lombok.Generated;
 @Generated
 @Repository
 public interface ProjectGeneratedDBORepository extends JpaRepository<ProjectDBO, Long> {
+
+	Optional<ProjectDBO> findByTitle(String title);
+
 }

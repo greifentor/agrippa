@@ -53,4 +53,9 @@ public abstract class ProjectGeneratedServiceImpl implements ProjectService {
 		persistencePort.delete(model);
 	}
 
+	@Override
+	public Optional<Project> findByTitle(String title) {
+		return persistencePort.findByTitle(title);
+	}
+
 }

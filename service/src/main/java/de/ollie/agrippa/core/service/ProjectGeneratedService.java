@@ -28,4 +28,6 @@ public interface ProjectGeneratedService {
 
 	void delete(Project model);
 
+	Optional<Project> findByTitle(String title);
+
 }
