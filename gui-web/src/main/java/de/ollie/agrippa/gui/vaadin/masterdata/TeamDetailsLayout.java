@@ -13,6 +13,7 @@ import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.component.AbstractMasterDataBaseLayout;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
 import de.ollie.agrippa.gui.vaadin.component.RemoveConfirmDialog;
 import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
@@ -89,7 +90,11 @@ public class TeamDetailsLayout extends AbstractMasterDataBaseLayout {
 	protected void save() {
 		model.setTitle(textFieldTitle.getValue());
 		model.setDescription(textAreaDescription.getValue());
-		observer.save(serviceProvider.getTeamService().update(model));
+		try {
+			observer.save(serviceProvider.getTeamService().update(model));
+		} catch (PersistenceFailureException pfe) {
+			PopupNotification.showError(pfe.getLocalizedMessage(resourceManager, session.getLocalization()));
+		}
 	}
 
 }

@@ -1,16 +1,20 @@
 package de.ollie.agrippa.gui.vaadin.masterdata;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
 import de.ollie.agrippa.core.model.Project;
-import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
+import de.ollie.agrippa.core.service.ProjectService;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.component.AbstractMasterDataBaseLayout;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
+import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
 import de.ollie.agrippa.gui.vaadin.component.RemoveConfirmDialog;
 import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
 import lombok.Generated;
@@ -52,7 +56,10 @@ public class ProjectDetailsLayout extends AbstractMasterDataBaseLayout {
 						"10px 10px 20px #e4e4e4, -10px 10px 20px #e4e4e4, -10px -10px 20px #e4e4e4, 10px -10px 20px #e4e4e4");
 		setMargin(false);
 		setWidthFull();
-		add(textFieldTitle, textAreaDescription, getMasterDataButtonLayout(model.getId() > 0));
+		add(
+				textFieldTitle,
+				textAreaDescription,
+				getMasterDataButtonLayout(model.getId() > 0));
 		textFieldTitle.focus();
 	}
 

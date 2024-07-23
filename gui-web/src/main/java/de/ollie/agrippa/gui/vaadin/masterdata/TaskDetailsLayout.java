@@ -23,6 +23,7 @@ import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
 import de.ollie.agrippa.gui.vaadin.masterdata.layout.list.NoteListDetailsLayout;
 import de.ollie.agrippa.gui.vaadin.masterdata.layout.list.TodoListDetailsLayout;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
 import de.ollie.agrippa.gui.vaadin.component.RemoveConfirmDialog;
 import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
@@ -133,7 +134,11 @@ public class TaskDetailsLayout extends AbstractMasterDataBaseLayout {
 		model.setTeam(comboBoxTeam.getValue());
 		model.setTaskStatus(comboBoxTaskStatus.getValue());
 		model.setDescription(textAreaDescription.getValue());
-		observer.save(serviceProvider.getTaskService().update(model));
+		try {
+			observer.save(serviceProvider.getTaskService().update(model));
+		} catch (PersistenceFailureException pfe) {
+			PopupNotification.showError(pfe.getLocalizedMessage(resourceManager, session.getLocalization()));
+		}
 	}
 
 }
