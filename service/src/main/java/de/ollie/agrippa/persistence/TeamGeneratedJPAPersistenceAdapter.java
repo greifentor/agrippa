@@ -1,7 +1,6 @@
 package de.ollie.agrippa.persistence;
 
-import static de.ollie.agrippa.util.Check.ensure;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +10,9 @@ import javax.inject.Inject;
 import de.ollie.agrippa.core.model.Page;
 import de.ollie.agrippa.core.model.PageParameters;
 import de.ollie.agrippa.core.model.Team;
-import de.ollie.agrippa.core.service.exception.NotNullConstraintViolationException;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException.Reason;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException.ValidationFailure;
 import de.ollie.agrippa.core.service.port.persistence.TeamPersistencePort;
 import de.ollie.agrippa.persistence.converter.PageConverter;
 import de.ollie.agrippa.persistence.converter.PageParametersToPageableConverter;
@@ -66,10 +67,18 @@ public abstract class TeamGeneratedJPAPersistenceAdapter implements TeamPersiste
 
 	@Override
 	public Team update(Team model) {
-		ensure(
-				model.getTitle() != null,
-				() -> new NotNullConstraintViolationException("Team field title cannot be null.", "Team", "title"));
+		ensureNoViolationsFound(model);
 		return converter.toModel(repository.save(converter.toDBO(model)));
+	}
+
+	private void ensureNoViolationsFound(Team model) {
+		List<ValidationFailure> failures = new ArrayList<>();
+		if (model.getTitle() == null) {
+			failures.add(new ValidationFailure(Reason.NOT_NULL, "Team", "title"));
+		}
+		if (!failures.isEmpty()) {
+			throw new PersistenceFailureException("" + model.getId(), failures);
+		}
 	}
 
 	@Override

@@ -79,11 +79,13 @@ public abstract class ProjectGeneratedJPAPersistenceAdapter implements ProjectPe
 		if (model.getTitle() == null) {
 			failures.add(new ValidationFailure(Reason.NOT_NULL, "Project", "title"));
 		}
+		if (!findByTitle(model.getTitle())
+				.filter(project -> project.getId() != model.getId())
+				.isEmpty()) {
+			failures.add(new ValidationFailure(Reason.UNIQUE, "Project", "title"));
+		}
 		if ((model.getTitle() != null) && model.getTitle().isBlank()) {
 			failures.add(new ValidationFailure(Reason.NOT_BLANK, "Project", "title"));
-		}
-		if (!findByTitle(model.getTitle()).filter(project -> project.getId() != model.getId()).isEmpty()) {
-			failures.add(new ValidationFailure(Reason.UNIQUE, "Project", "title"));
 		}
 		if (!failures.isEmpty()) {
 			throw new PersistenceFailureException("" + model.getId(), failures);

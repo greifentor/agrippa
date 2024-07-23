@@ -1,7 +1,6 @@
 package de.ollie.agrippa.persistence;
 
-import static de.ollie.agrippa.util.Check.ensure;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,8 +10,9 @@ import javax.inject.Inject;
 import de.ollie.agrippa.core.model.Page;
 import de.ollie.agrippa.core.model.PageParameters;
 import de.ollie.agrippa.core.model.User;
-import de.ollie.agrippa.core.service.exception.NotNullConstraintViolationException;
-import de.ollie.agrippa.core.service.exception.UniqueConstraintViolationException;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException.Reason;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException.ValidationFailure;
 import de.ollie.agrippa.core.service.port.persistence.UserPersistencePort;
 import de.ollie.agrippa.persistence.converter.PageConverter;
 import de.ollie.agrippa.persistence.converter.PageParametersToPageableConverter;
@@ -67,18 +67,26 @@ public abstract class UserGeneratedJPAPersistenceAdapter implements UserPersiste
 
 	@Override
 	public User update(User model) {
-		ensure(
-				model.getName() != null,
-				() -> new NotNullConstraintViolationException("User field name cannot be null.", "User", "name"));
-		ensure(
-				model.getToken() != null,
-				() -> new NotNullConstraintViolationException("User field token cannot be null.", "User", "token"));
-		ensure(
-				findByGlobalId(model.getGlobalId())
-						.filter(user -> user.getId() != model.getId())
-						.isEmpty(),
-				() -> new UniqueConstraintViolationException("globalId '" + model.getGlobalId() + "' is already set for another record", "User", "globalId"));
+		ensureNoViolationsFound(model);
 		return converter.toModel(repository.save(converter.toDBO(model)));
+	}
+
+	private void ensureNoViolationsFound(User model) {
+		List<ValidationFailure> failures = new ArrayList<>();
+		if (model.getName() == null) {
+			failures.add(new ValidationFailure(Reason.NOT_NULL, "User", "name"));
+		}
+		if (model.getToken() == null) {
+			failures.add(new ValidationFailure(Reason.NOT_NULL, "User", "token"));
+		}
+		if (!findByGlobalId(model.getGlobalId())
+				.filter(user -> user.getId() != model.getId())
+				.isEmpty()) {
+			failures.add(new ValidationFailure(Reason.UNIQUE, "User", "globalId"));
+		}
+		if (!failures.isEmpty()) {
+			throw new PersistenceFailureException("" + model.getId(), failures);
+		}
 	}
 
 	@Override

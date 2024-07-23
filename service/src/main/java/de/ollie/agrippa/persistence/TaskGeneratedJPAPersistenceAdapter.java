@@ -1,7 +1,6 @@
 package de.ollie.agrippa.persistence;
 
-import static de.ollie.agrippa.util.Check.ensure;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +10,9 @@ import javax.inject.Inject;
 import de.ollie.agrippa.core.model.Page;
 import de.ollie.agrippa.core.model.PageParameters;
 import de.ollie.agrippa.core.model.Task;
-import de.ollie.agrippa.core.service.exception.NotNullConstraintViolationException;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException.Reason;
+import de.ollie.agrippa.core.service.exception.PersistenceFailureException.ValidationFailure;
 import de.ollie.agrippa.core.service.port.persistence.TaskPersistencePort;
 import de.ollie.agrippa.persistence.converter.PageConverter;
 import de.ollie.agrippa.persistence.converter.PageParametersToPageableConverter;
@@ -66,19 +67,27 @@ public abstract class TaskGeneratedJPAPersistenceAdapter implements TaskPersiste
 
 	@Override
 	public Task update(Task model) {
-		ensure(
-				model.getProject() != null,
-				() -> new NotNullConstraintViolationException("Task field project cannot be null.", "Task", "project"));
-		ensure(
-				model.getUser() != null,
-				() -> new NotNullConstraintViolationException("Task field user cannot be null.", "Task", "user"));
-		ensure(
-				model.getTaskStatus() != null,
-				() -> new NotNullConstraintViolationException("Task field taskStatus cannot be null.", "Task", "taskStatus"));
-		ensure(
-				model.getTitle() != null,
-				() -> new NotNullConstraintViolationException("Task field title cannot be null.", "Task", "title"));
+		ensureNoViolationsFound(model);
 		return converter.toModel(repository.save(converter.toDBO(model)));
+	}
+
+	private void ensureNoViolationsFound(Task model) {
+		List<ValidationFailure> failures = new ArrayList<>();
+		if (model.getProject() == null) {
+			failures.add(new ValidationFailure(Reason.NOT_NULL, "Task", "project"));
+		}
+		if (model.getUser() == null) {
+			failures.add(new ValidationFailure(Reason.NOT_NULL, "Task", "user"));
+		}
+		if (model.getTaskStatus() == null) {
+			failures.add(new ValidationFailure(Reason.NOT_NULL, "Task", "taskStatus"));
+		}
+		if (model.getTitle() == null) {
+			failures.add(new ValidationFailure(Reason.NOT_NULL, "Task", "title"));
+		}
+		if (!failures.isEmpty()) {
+			throw new PersistenceFailureException("" + model.getId(), failures);
+		}
 	}
 
 	@Override
