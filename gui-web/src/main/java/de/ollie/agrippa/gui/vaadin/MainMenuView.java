@@ -189,7 +189,14 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 						ttd -> (ttd.getTask().getTeam() != null ? ttd.getTask().getTeam().getTitle() : "-"),
 						2,
 						"9%");
-		projectTitleColumn = addColumn(grid, ttd -> ttd.getTask().getProject().getTitle(), 3, "14%");
+        projectTitleColumn = addColumnWithComponent(grid,
+                ttd -> ttd.getTask().getProject().getProjectLinks().isEmpty()
+                        ? createLabel(ttd.getTask().getProject().getTitle())
+                        : createProjectButton(ttd),
+                3,
+                "18%",
+                null,
+                false);
 		taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 4, "18%");
 		taskLinksColumn =
 				addColumnWithComponent(
@@ -199,8 +206,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 						"10%",
 						(ttd0, ttd1) -> ttd0.getLinksString().compareTo(ttd1.getLinksString()),
 						true);
-		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "30%");
-		addColumnWithComponent(grid, ttd -> createTaskButton(ttd), 7, "5%", null, false);
+        todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "25%");
+        addColumnWithComponent(grid, ttd -> createTaskButton(ttd), 7, "6%", null, false);
 		updateGrid();
 		grid.setAllRowsVisible(true);
 		grid.setWidthFull();
@@ -225,21 +232,25 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		return label;
 	}
 
-	private Button createTaskButton(TaskTodoData ttd) {
-		Button b =
-				componentFactory
-						.createButton(
-								resourceManager
-										.getLocalizedString(
-												"MainMenuView.gridTaskTodos.column.task.button.label",
-												session.getLocalization()));
-		b.addClickListener(e -> {
-			QueryParameters parameters = new QueryParameters(Map.of("id", List.of("" + ttd.getTask().getId())));
-			session.addReturnUrl(MainMenuView.URL);
-			getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
-		});
-		return b;
-	}
+    private Button createProjectButton(TaskTodoData ttd) {
+        Project project = ttd.getTask().getProject();
+        Button b = componentFactory.createButton(project.getTitle());
+        b.addClickListener(e -> new ProjectLinksDialog(project, resourceManager, session.getLocalization()));
+        b.setWidthFull();
+        return b;
+    }
+
+    private Button createTaskButton(TaskTodoData ttd) {
+        Button b = componentFactory.createButton(resourceManager
+                .getLocalizedString("MainMenuView.gridTaskTodos.column.task.button.label", session.getLocalization()));
+        b.addClickListener(e -> {
+            QueryParameters parameters = new QueryParameters(Map.of("id", List.of("" + ttd.getTask().getId())));
+            session.addReturnUrl(MainMenuView.URL);
+            System.out.println("1:" + session);
+            getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
+        });
+        return b;
+    }
 
 	private void updateGrid() {
 		List<TaskTodoData> l = new ArrayList<>();

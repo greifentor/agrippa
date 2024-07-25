@@ -1,7 +1,5 @@
 package de.ollie.agrippa.core.model;
 
-import java.util.List;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Generated;
@@ -9,7 +7,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
- * A model for projects.
+ * A model for project_links.
  *
  * GENERATED CODE !!! DO NOT CHANGE !!!
  */
@@ -18,10 +16,10 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Generated
 @ToString(callSuper = true)
-public class Project extends GeneratedProject<Project> {
+public class ProjectLink extends GeneratedProjectLink<ProjectLink> {
 
 	@Override
-	public Project self() {
+	public ProjectLink self() {
 		return this;
 	}
 

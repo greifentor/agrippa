@@ -109,7 +109,7 @@ public class ProjectMaintenanceView extends AbstractMasterDataBaseLayout impleme
 										.createBackButton(
 												resourceManager,
 												this::getUI,
-												session.getReturnUrl().orElse(new ReturnUrlData(ProjectPageView.URL)),
+                                        () -> session.getReturnUrl().orElse(new ReturnUrlData(ProjectPageView.URL)),
 												session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
 								resourceManager.getLocalizedString("ProjectMaintenanceView.header.prefix.label", session.getLocalization()) + getHeaderSuffix(model),

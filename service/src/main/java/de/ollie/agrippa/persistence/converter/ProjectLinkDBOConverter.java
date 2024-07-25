@@ -8,35 +8,31 @@ import javax.inject.Named;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 
-import de.ollie.agrippa.persistence.entity.ProjectDBO;
-import de.ollie.agrippa.core.model.Project;
+import de.ollie.agrippa.persistence.entity.ProjectLinkDBO;
+import de.ollie.agrippa.core.model.ProjectLink;
 
 /**
- * A DBO converter for projects.
+ * A DBO converter for project_links.
  *
  * GENERATED CODE !!! DO NOT CHANGE !!!
  */
 @Generated
 @Named
 @RequiredArgsConstructor
-public class ProjectDBOConverter implements ToModelConverter<Project, ProjectDBO> {
+public class ProjectLinkDBOConverter implements ToModelConverter<ProjectLink, ProjectLinkDBO> {
 
-	private final UserDBOConverter userDBOConverter;
-	private final ProjectLinkDBOConverter projectLinkDBOConverter;
-
-	public ProjectDBO toDBO(Project model) {
+	public ProjectLinkDBO toDBO(ProjectLink model) {
 		if (model == null) {
 			return null;
 		}
-		return new ProjectDBO()
+		return new ProjectLinkDBO()
 				.setId(model.getId())
-				.setUser(userDBOConverter.toDBO(model.getUser()))
 				.setDescription(model.getDescription())
 				.setTitle(model.getTitle())
-				.setProjectLinks(projectLinkDBOConverter.toDBO(model.getProjectLinks()));
+				.setUrl(model.getUrl());
 	}
 
-	public List<ProjectDBO> toDBO(List<Project> models) {
+	public List<ProjectLinkDBO> toDBO(List<ProjectLink> models) {
 		if (models == null) {
 			return null;
 		}
@@ -44,20 +40,19 @@ public class ProjectDBOConverter implements ToModelConverter<Project, ProjectDBO
 	}
 
 	@Override
-	public Project toModel(ProjectDBO dbo) {
+	public ProjectLink toModel(ProjectLinkDBO dbo) {
 		if (dbo == null) {
 			return null;
 		}
-		return new Project()
+		return new ProjectLink()
 				.setId(dbo.getId())
-				.setUser(userDBOConverter.toModel(dbo.getUser()))
 				.setDescription(dbo.getDescription())
 				.setTitle(dbo.getTitle())
-				.setProjectLinks(projectLinkDBOConverter.toModel(dbo.getProjectLinks()));
+				.setUrl(dbo.getUrl());
 	}
 
 	@Override
-	public List<Project> toModel(List<ProjectDBO> dbos) {
+	public List<ProjectLink> toModel(List<ProjectLinkDBO> dbos) {
 		if (dbos == null) {
 			return null;
 		}

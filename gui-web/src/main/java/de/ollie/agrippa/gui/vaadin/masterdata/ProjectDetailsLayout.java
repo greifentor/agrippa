@@ -1,6 +1,8 @@
 package de.ollie.agrippa.gui.vaadin.masterdata;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.accordion.Accordion;
+import com.vaadin.flow.component.accordion.AccordionPanel;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -13,6 +15,7 @@ import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.component.AbstractMasterDataBaseLayout;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
 import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
+import de.ollie.agrippa.gui.vaadin.masterdata.layout.list.ProjectLinkListDetailsLayout;
 import de.ollie.agrippa.core.service.exception.PersistenceFailureException;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
 import de.ollie.agrippa.gui.vaadin.component.RemoveConfirmDialog;
@@ -56,9 +59,16 @@ public class ProjectDetailsLayout extends AbstractMasterDataBaseLayout {
 						"10px 10px 20px #e4e4e4, -10px 10px 20px #e4e4e4, -10px -10px 20px #e4e4e4, 10px -10px 20px #e4e4e4");
 		setMargin(false);
 		setWidthFull();
+		Accordion accordion = new Accordion();
+		accordion.add(new AccordionPanel(
+				resourceManager.getLocalizedString("ProjectDetailsLayout.accordion.ProjectLinkListDetailsLayout.label"),
+				new ProjectLinkListDetailsLayout(
+						componentFactory, guiConfiguration, model, resourceManager, serviceProvider, session)));
+		accordion.setWidthFull();
 		add(
 				textFieldTitle,
 				textAreaDescription,
+				accordion,
 				getMasterDataButtonLayout(model.getId() > 0));
 		textFieldTitle.focus();
 	}

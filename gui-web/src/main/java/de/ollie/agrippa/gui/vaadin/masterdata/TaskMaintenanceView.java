@@ -13,8 +13,6 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 
 import de.ollie.agrippa.core.model.Task;
-import de.ollie.agrippa.core.service.ProjectService;
-import de.ollie.agrippa.core.service.TeamService;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.SessionData.ReturnUrlData;
@@ -108,11 +106,10 @@ public class TaskMaintenanceView extends AbstractMasterDataBaseLayout implements
 		add(
 				new HeaderLayout(
 						buttonFactory
-										.createBackButton(
-												resourceManager,
-												this::getUI,
-												session.getReturnUrl().orElse(new ReturnUrlData(TaskPageView.URL)),
-												session),
+                                .createBackButton(resourceManager,
+                                        this::getUI,
+                                        () -> session.getReturnUrl().orElse(new ReturnUrlData(TaskPageView.URL)),
+                                        session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
 								resourceManager.getLocalizedString("TaskMaintenanceView.header.prefix.label", session.getLocalization()) + getHeaderSuffix(model),
 								HeaderLayoutMode.PLAIN),
@@ -148,8 +145,8 @@ public class TaskMaintenanceView extends AbstractMasterDataBaseLayout implements
 	}
 
 	private void navigateBack() {
-		ReturnUrlData urlBack = session.getReturnUrl().orElse(new ReturnUrlData(TaskPageView.URL));
-		getUI().ifPresent(ui -> ui.navigate(urlBack.getUrl(), new QueryParameters(urlBack.getParameters())));
+        ReturnUrlData urlBack = session.getReturnUrl().orElse(new ReturnUrlData(TaskPageView.URL));
+        getUI().ifPresent(ui -> ui.navigate(urlBack.getUrl(), new QueryParameters(urlBack.getParameters())));
 	}
 
 	@Override

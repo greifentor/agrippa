@@ -29,6 +29,7 @@ import de.ollie.agrippa.core.model.TodoPriority;
 import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.model.Note;
 import de.ollie.agrippa.core.model.Project;
+import de.ollie.agrippa.core.model.ProjectLink;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.Team;
 import de.ollie.agrippa.core.model.Todo;
@@ -79,6 +80,8 @@ public class ComponentFactory {
 	private MasterDataGridFieldRenderer<Note> noteMasterDataGridFieldRenderer;
 	@Autowired(required = false)
 	private MasterDataGridFieldRenderer<Project> projectMasterDataGridFieldRenderer;
+	@Autowired(required = false)
+	private MasterDataGridFieldRenderer<ProjectLink> projectLinkMasterDataGridFieldRenderer;
 	@Autowired(required = false)
 	private MasterDataGridFieldRenderer<Task> taskMasterDataGridFieldRenderer;
 	@Autowired(required = false)
