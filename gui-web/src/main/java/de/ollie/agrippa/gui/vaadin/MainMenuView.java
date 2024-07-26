@@ -369,8 +369,9 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 
 	private void edit(TaskTodoData ttd) {
 		new TodoDetailsDialog(componentFactory, masterDataGUIConfiguration, (t, b) -> {
-			ttd.getTodo().setDescription(t.getDescription());
-			ttd.getTodo().setPriority(t.getPriority());
+            ttd.getTodo().setDescription(t.getDescription());
+            ttd.getTodo().setDueDate(t.getDueDate());
+            ttd.getTodo().setPriority(t.getPriority());
 			ttd.getTodo().setStatus(t.getStatus());
 			ttd.getTodo().setTitle(t.getTitle());
 			taskService.update(ttd.getTask());
