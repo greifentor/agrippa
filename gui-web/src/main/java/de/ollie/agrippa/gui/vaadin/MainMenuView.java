@@ -111,7 +111,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	private final ResourceManager resourceManager;
 	private final ServiceProvider serviceProvider;
 	private final SessionData session;
-	private final TaskService taskService;
+    private final TaskService taskService;
+    private final TodoDueStatusCssClassService todoDueStatusCssClassService;
 	private final WebAppConfiguration configuration;
 
 	private Grid<TaskTodoData> grid;
@@ -208,6 +209,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 						true);
         todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "25%");
         addColumnWithComponent(grid, ttd -> createTaskButton(ttd), 7, "6%", null, false);
+        grid.setClassNameGenerator(ttd -> todoDueStatusCssClassService.getCssClassName(ttd.getTodo()));
 		updateGrid();
 		grid.setAllRowsVisible(true);
 		grid.setWidthFull();

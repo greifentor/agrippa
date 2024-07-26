@@ -36,7 +36,7 @@ public class TodoDBO {
 	private long id;
 	@Column(name = "DESCRIPTION")
 	private String description;
-	@Column(name = "DueDate")
+	@Column(name = "DUE_DATE")
 	private LocalDateTime dueDate;
 	@Enumerated(EnumType.STRING)
 	@Column(name = "PRIORITY", nullable = false)

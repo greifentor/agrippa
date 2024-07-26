@@ -161,4 +161,9 @@
 		<addPrimaryKey columnNames="ID" tableName="PROJECT_LINK" />
 		<addAutoIncrement columnDataType="BIGINT" columnName="ID" startWith="1" tableName="PROJECT_LINK" />
 	</changeSet>
+	<changeSet author="dm-comp" id="Add-Field-DUE_DATE-to-Table-TODO" runInTransaction="true" failOnError="true">
+		<addColumn tableName="TODO">
+			<column name="DUE_DATE" type="TIMESTAMP" />
+		</addColumn>
+	</changeSet>
 </databaseChangeLog>
