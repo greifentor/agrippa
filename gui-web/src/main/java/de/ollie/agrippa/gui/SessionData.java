@@ -15,6 +15,8 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 
 import de.ollie.agrippa.core.model.localization.LocalizationSO;
 import de.ollie.agrippa.core.service.JWTService.AuthorizationData;
+import de.ollie.agrippa.gui.AccessChecker;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

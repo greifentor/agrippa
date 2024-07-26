@@ -4,6 +4,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
@@ -42,6 +43,7 @@ public class TodoDetailsDialog extends Dialog {
 	private ComboBox<TodoPriority> comboBoxPriority;
 	private ComboBox<TodoStatus> comboBoxStatus;
 	private TextArea textAreaDescription;
+	private DateTimePicker dateTimePickerDueDate;
 	private VerticalLayout mainLayout;
 
 	private Todo model = new Todo();
@@ -60,6 +62,7 @@ public class TodoDetailsDialog extends Dialog {
 			this.model.setPriority(model.getPriority());
 			this.model.setStatus(model.getStatus());
 			this.model.setDescription(model.getDescription());
+			this.model.setDueDate(model.getDueDate());
 		}
 		mainLayout = new VerticalLayout();
 		addComponents();
@@ -94,11 +97,16 @@ public class TodoDetailsDialog extends Dialog {
 			model.setDescription(event.getValue());
 			updateSaveButton();
 		});
+		dateTimePickerDueDate = componentFactory.createDateTimePicker("TodoDetailsLayout.field.duedate.label", session.getLocalization(), model.getDueDate(), event -> {
+			model.setDueDate(event.getValue());
+			updateSaveButton();
+		});
 		mainLayout.add(
 				textFieldTitle,
 				comboBoxPriority,
 				comboBoxStatus,
-				textAreaDescription
+				textAreaDescription,
+				dateTimePickerDueDate
 		);
 	}
 

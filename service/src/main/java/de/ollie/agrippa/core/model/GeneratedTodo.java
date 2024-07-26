@@ -1,5 +1,7 @@
 package de.ollie.agrippa.core.model;
 
+import java.time.LocalDateTime;
+
 import lombok.Data;
 import lombok.Generated;
 import lombok.experimental.Accessors;
@@ -16,12 +18,14 @@ public abstract class GeneratedTodo<T extends Todo> {
 
 	public static final String ID = "ID";
 	public static final String DESCRIPTION = "DESCRIPTION";
+	public static final String DUEDATE = "DUEDATE";
 	public static final String PRIORITY = "PRIORITY";
 	public static final String STATUS = "STATUS";
 	public static final String TITLE = "TITLE";
 
 	private long id;
 	private String description;
+	private LocalDateTime dueDate;
 	private TodoPriority priority = TodoPriority.MEDIUM;
 	private TodoStatus status = TodoStatus.OPEN;
 	private String title;
@@ -35,6 +39,11 @@ public abstract class GeneratedTodo<T extends Todo> {
 
 	public T setDescription(String description) {
 		this.description = description;
+		return self();
+	}
+
+	public T setDueDate(LocalDateTime dueDate) {
+		this.dueDate = dueDate;
 		return self();
 	}
 

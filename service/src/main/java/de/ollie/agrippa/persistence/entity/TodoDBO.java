@@ -1,5 +1,7 @@
 package de.ollie.agrippa.persistence.entity;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -34,6 +36,8 @@ public class TodoDBO {
 	private long id;
 	@Column(name = "DESCRIPTION")
 	private String description;
+	@Column(name = "DueDate")
+	private LocalDateTime dueDate;
 	@Enumerated(EnumType.STRING)
 	@Column(name = "PRIORITY", nullable = false)
 	private TodoPriorityDBO priority;

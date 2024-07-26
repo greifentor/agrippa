@@ -31,6 +31,7 @@ public class TodoDBOConverter implements ToModelConverter<Todo, TodoDBO> {
 		return new TodoDBO()
 				.setId(model.getId())
 				.setDescription(model.getDescription())
+				.setDueDate(model.getDueDate())
 				.setPriority(todoPriorityDBOConverter.toDBO(model.getPriority()))
 				.setStatus(todoStatusDBOConverter.toDBO(model.getStatus()))
 				.setTitle(model.getTitle());
@@ -51,6 +52,7 @@ public class TodoDBOConverter implements ToModelConverter<Todo, TodoDBO> {
 		return new Todo()
 				.setId(dbo.getId())
 				.setDescription(dbo.getDescription())
+				.setDueDate(dbo.getDueDate())
 				.setPriority(todoPriorityDBOConverter.toModel(dbo.getPriority()))
 				.setStatus(todoStatusDBOConverter.toModel(dbo.getStatus()))
 				.setTitle(dbo.getTitle());

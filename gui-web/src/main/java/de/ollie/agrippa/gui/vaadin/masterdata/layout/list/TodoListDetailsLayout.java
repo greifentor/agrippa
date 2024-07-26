@@ -63,6 +63,7 @@ public class TodoListDetailsLayout extends VerticalLayout {
 				mmbr.setPriority(toEdit.getPriority());
 				mmbr.setStatus(toEdit.getStatus());
 				mmbr.setDescription(toEdit.getDescription());
+				mmbr.setDueDate(toEdit.getDueDate());
 				grid.setItems(model.getTodos());
 			}, session, grid.getSelectedItems().toArray(new Todo[0])[0], serviceProvider, false).open();
 		}, session);
@@ -103,6 +104,14 @@ public class TodoListDetailsLayout extends VerticalLayout {
 						resourceManager
 								.getLocalizedString(
 										"TodoListDetailsLayout.grid.header.description.label",
+										session.getLocalization()))
+				.setSortable(true);
+		grid
+				.addColumn(model -> getCellString("DUEDATE", model, () -> model.getDueDate()))
+				.setHeader(
+						resourceManager
+								.getLocalizedString(
+										"TodoListDetailsLayout.grid.header.duedate.label",
 										session.getLocalization()))
 				.setSortable(true);
 		if (!model.getTodos().isEmpty() && (model.getTodos().get(0) instanceof Comparable)) {
