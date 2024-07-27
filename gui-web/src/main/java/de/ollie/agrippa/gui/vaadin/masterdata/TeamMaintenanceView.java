@@ -109,7 +109,7 @@ public class TeamMaintenanceView extends AbstractMasterDataBaseLayout implements
 										.createBackButton(
 												resourceManager,
 												this::getUI,
-                                        () -> session.getReturnUrl().orElse(new ReturnUrlData(TeamPageView.URL)),
+												() -> session.getReturnUrl().orElse(new ReturnUrlData(TeamPageView.URL)),
 												session),
 						buttonFactory.createLogoutButton(resourceManager, this::getUI, session, logger),
 								resourceManager.getLocalizedString("TeamMaintenanceView.header.prefix.label", session.getLocalization()) + getHeaderSuffix(model),
