@@ -1,0 +1,14 @@
+.grid-alert {
+    background-color: darkred;
+    color: white;
+}
+
+.grid-warn {
+    background-color: yellow;
+    color: black;
+}
+
+.grid-regular {
+    background-color: white;
+    color: black;
+}
