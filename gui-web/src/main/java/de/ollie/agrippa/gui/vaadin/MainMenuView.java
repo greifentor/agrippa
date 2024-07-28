@@ -10,8 +10,11 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.ItemLabelGenerator;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
@@ -32,6 +35,7 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 
 import de.ollie.agrippa.core.model.Note;
 import de.ollie.agrippa.core.model.NoteType;
@@ -72,6 +76,14 @@ import lombok.RequiredArgsConstructor;
 @CssImport(themeFor = "vaadin-grid", value = "./styles/vaadin-grid-styles.css")
 @RequiredArgsConstructor
 public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUrlParameter<String> {
+
+	private static final String GRID_PREFERENCE_ID_PRIORITY = "mainMenuView.grid.priority";
+	private static final String GRID_PREFERENCE_ID_PROJECT = "mainMenuView.grid.project";
+	private static final String GRID_PREFERENCE_ID_TEAM = "mainMenuView.grid.team";
+	private static final String GRID_PREFERENCE_ID_TITLE = "mainMenuView.grid.title";
+	private static final String GRID_PREFERENCE_ID_LINKS = "mainMenuView.grid.links";
+	private static final String GRID_PREFERENCE_ID_TODO_AND_TASK_STATUS = "mainMenuView.grid.todoAndTaskStatus";
+	private static final String GRID_PREFERENCE_ID_TODO_TITLE = "mainMenuView.grid.todoTitle";
 
 	@AllArgsConstructor
 	@Getter
@@ -287,6 +299,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 				.setComponent(
 						createFilterHeader(
 								filter::setTodoPriority,
+								GRID_PREFERENCE_ID_PRIORITY,
 								p -> resourceManager.getLocalizedString("TodoPriority." + p.name() + ".label"),
 								TodoPriority.values()));
 		headerRow
@@ -294,6 +307,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 				.setComponent(
 						createFilterHeader(
 								filter::setProject,
+								GRID_PREFERENCE_ID_PROJECT,
 								p -> p != null ? p.getTitle() : "",
 								serviceProvider.getProjectService().findAll()));
 		headerRow
@@ -301,12 +315,27 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 				.setComponent(
 						createFilterHeader(
 								filter::setTeam,
+								GRID_PREFERENCE_ID_TEAM,
 								t -> t != null ? t.getTitle() : "",
 								serviceProvider.getTeamService().findAll()));
-		headerRow.getCell(taskTitleColumn).setComponent(createFilterHeader(filter::setTaskTitle));
-		headerRow.getCell(taskLinksColumn).setComponent(createFilterHeader(filter::setTaskLinks));
-		headerRow.getCell(todoAndTaskStatusColumn).setComponent(createFilterHeader(filter::setTodoAndTaskStatus));
-		headerRow.getCell(todoTitleColumn).setComponent(createFilterHeader(filter::setTodoTitle));
+		headerRow
+				.getCell(taskTitleColumn)
+				.setComponent(createFilterHeader(filter::setTaskTitle, GRID_PREFERENCE_ID_TITLE));
+		headerRow
+				.getCell(taskLinksColumn)
+				.setComponent(createFilterHeader(filter::setTaskLinks, GRID_PREFERENCE_ID_LINKS));
+		headerRow
+				.getCell(todoAndTaskStatusColumn)
+				.setComponent(
+						createFilterHeader(filter::setTodoAndTaskStatus, GRID_PREFERENCE_ID_TODO_AND_TASK_STATUS));
+		headerRow
+				.getCell(todoTitleColumn)
+				.setComponent(createFilterHeader(filter::setTodoTitle, GRID_PREFERENCE_ID_TODO_TITLE));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T getPreference(String id) {
+		return (T) session.findParameter(id).orElse(null);
 	}
 
 	private Column<TaskTodoData> addColumn(Grid<TaskTodoData> grid, ValueProvider<TaskTodoData, ?> valueProvider,
@@ -353,27 +382,42 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		getUI().ifPresent(ui -> ui.navigate(MasterDataView.URL));
 	}
 
-	private Component createFilterHeader(Consumer<String> filterChangeConsumer) {
+	private Component createFilterHeader(Consumer<String> filterChangeConsumer, String id) {
 		TextField textField = new TextField();
 		textField.setValueChangeMode(ValueChangeMode.EAGER);
 		textField.setClearButtonVisible(true);
 		textField.setWidthFull();
-		textField.addValueChangeListener(e -> filterChangeConsumer.accept(e.getValue()));
+		textField.addValueChangeListener(e -> {
+			filterChangeConsumer.accept(e.getValue());
+			session.setParameter(id, textField.getValue());
+		});
+		String preference = getPreference(id);
+		if (preference != null) {
+			textField.setValue(preference);
+		}
 		return textField;
 	}
 
-	private <T> Component createFilterHeader(Consumer<T> filterChangeConsumer, ItemLabelGenerator<T> renderer,
-			T... selectableObjects) {
-		return createFilterHeader(filterChangeConsumer, renderer, List.of(selectableObjects));
+	private <T> Component createFilterHeader(Consumer<T> filterChangeConsumer, String id,
+			ItemLabelGenerator<T> renderer, T... selectableObjects) {
+		return createFilterHeader(filterChangeConsumer, id, renderer, List.of(selectableObjects));
 	}
 
-	private <T> Component createFilterHeader(Consumer<T> filterChangeConsumer, ItemLabelGenerator<T> renderer,
-			List<T> selectableObjects) {
+	private <T> Component createFilterHeader(Consumer<T> filterChangeConsumer, String id,
+			ItemLabelGenerator<T> renderer, List<T> selectableObjects) {
 		ComboBox<T> comboBox = new ComboBox<>(null, selectableObjects);
 		comboBox.setClearButtonVisible(true);
 		comboBox.setItemLabelGenerator(renderer);
 		comboBox.setWidthFull();
-		comboBox.addValueChangeListener(e -> filterChangeConsumer.accept(e.getValue()));
+		comboBox.addValueChangeListener(e -> {
+			filterChangeConsumer.accept(e.getValue());
+			session.setParameter(id, comboBox.getValue());
+		});
+		T preference = getPreference(id);
+		if (preference != null) {
+			System.out.println(preference + " - " + id);
+			comboBox.setValue(preference);
+		}
 		return comboBox;
 	}
 
@@ -387,6 +431,26 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 			taskService.update(ttd.getTask());
 			updateGrid();
 		}, session, ttd.todo, serviceProvider, false).open();
+	}
+
+	private Registration registration;
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		LOG.info("onAttach");
+		super.onAttach(attachEvent);
+		UI.getCurrent().setPollInterval(60000);
+		registration = UI.getCurrent().addPollListener(pollEvent -> pollEvent.getSource().access(() -> {
+			LOG.info("poll event detected");
+			updateGrid();
+		}));
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+		registration.remove();
+		super.onDetach(detachEvent);
+		LOG.info("onDetach");
 	}
 
 }

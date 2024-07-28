@@ -18,25 +18,30 @@ import de.ollie.agrippa.core.service.TodoDueStatusService.TodoDueStatus;
 @ExtendWith(MockitoExtension.class)
 class TodoDueStatusCssClassServiceTest {
 
-    @Mock
-    private Todo todo;
+	@Mock
+	private Todo todo;
 
-    @Mock
-    private TodoDueStatusService todoDueStatusService;
+	@Mock
+	private TodoDueStatusService todoDueStatusService;
 
-    @InjectMocks
-    private TodoDueStatusCssClassService unitUnderTest;
+	@InjectMocks
+	private TodoDueStatusCssClassService unitUnderTest;
 
-    @Nested
-    class TestsOfMethod_getCssClassName_Todo {
+	@Nested
+	class TestsOfMethod_getCssClassName_Todo {
 
-        @ParameterizedTest
-        @CsvSource({ "ALERT,grid-alert", "WARN,grid-warn", "NONE,grid-regular" })
-        void returnsTheCorrectClassNameForThePassedTodoDueStatus(TodoDueStatus todoDueStatus, String expected) {
-            when(todoDueStatusService.getDueStatus(todo)).thenReturn(todoDueStatus);
-            assertEquals(expected, unitUnderTest.getCssClassName(todo));
-        }
+		@ParameterizedTest
+		@CsvSource({
+				"ALERT,grid-alert",
+				"WARN_LEVEL_1,grid-warn-1",
+				"WARN_LEVEL_2,grid-warn-2",
+				"WARN_LEVEL_3,grid-warn-3",
+				"NONE,grid-regular" })
+		void returnsTheCorrectClassNameForThePassedTodoDueStatus(TodoDueStatus todoDueStatus, String expected) {
+			when(todoDueStatusService.getDueStatus(todo)).thenReturn(todoDueStatus);
+			assertEquals(expected, unitUnderTest.getCssClassName(todo));
+		}
 
-    }
+	}
 
 }

@@ -3,8 +3,18 @@
     color: white;
 }
 
-.grid-warn {
-    background-color: yellow;
+.grid-warn-1 {
+    background-color: lemonchiffon;
+    color: black;
+}
+
+.grid-warn-2 {
+    background-color: rgb(252, 252, 110);
+    color: black;
+}
+
+.grid-warn-3 {
+    background-color: goldenrod;
     color: black;
 }
 

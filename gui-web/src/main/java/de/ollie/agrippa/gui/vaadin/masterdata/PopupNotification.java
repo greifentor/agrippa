@@ -5,6 +5,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -19,6 +20,7 @@ public class PopupNotification {
 		HorizontalLayout layout = new HorizontalLayout(text, closeButton);
 		layout.setAlignItems(Alignment.CENTER);
 		notification.add(layout);
+		notification.setPosition(Position.TOP_STRETCH);
 		notification.open();
 	}
 
