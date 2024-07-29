@@ -87,17 +87,21 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 
 	@AllArgsConstructor
 	@Getter
-	class TaskTodoData {
+    static class TaskTodoData {
 		private Task task;
 		private Todo todo;
 
 		String getTodoAndTaskStatus() {
-			return "(" + getTodo().getStatus().ordinal() + ") " + getTodo().getStatus().name() + " ("
+            return (getTodo().getStatus() == null
+                    ? ""
+                    : "(" + getTodo().getStatus().ordinal() + ") " + getTodo().getStatus().name()) + " ("
 					+ getTask().getTaskStatus() + ")";
 		}
 
 		String getPriorityStr() {
-			return "(" + getTodo().getPriority().ordinal() + ") " + getTodo().getPriority().name();
+            return getTodo().getPriority() == null
+                    ? ""
+                    : "(" + getTodo().getPriority().ordinal() + ") " + getTodo().getPriority().name();
 		}
 
 		List<Note> getLinkNotes() {
@@ -127,6 +131,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 	private final SessionData session;
 	private final TaskService taskService;
 	private final TodoDueStatusCssClassService todoDueStatusCssClassService;
+    private final TaskTodoDataGridViewComparator taskTodoDataGridViewComparator;
 	private final WebAppConfiguration configuration;
 
 	private Grid<TaskTodoData> grid;
@@ -284,13 +289,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 				.collect(Collectors.toList())) {
 			addTodo(l, t);
 		}
-		l = l.stream().sorted((ttd0, ttd1) -> {
-			int i = ttd0.getPriorityStr().compareTo(ttd1.getPriorityStr());
-			if (i == 0) {
-				i = ttd0.getTodoAndTaskStatus().compareTo(ttd1.getTodoAndTaskStatus());
-			}
-			return i;
-		}).collect(Collectors.toList());
+        l = l.stream().sorted(taskTodoDataGridViewComparator).collect(Collectors.toList());
 		GridListDataView<TaskTodoData> dataView = grid.setItems(l);
 		filter = new TaskTodoDataFilter(dataView);
 		HeaderRow headerRow = grid.getHeaderRows().size() < 2 ? grid.appendHeaderRow() : grid.getHeaderRows().get(1);
