@@ -29,33 +29,33 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ApplicationStartView extends VerticalLayout implements BeforeEnterObserver {
 
-	public static final Logger LOG = LogManager.getLogger(ApplicationStartView.class);
-	public static final String URL = "agrippa";
+    public static final Logger LOG = LogManager.getLogger(ApplicationStartView.class);
+    public static final String URL = "agrippa";
 
     private final SessionData session;
     private final AccessGranter accessGranter;
 
-	@Override
-	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+    @Override
+    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         accessGranter.grantAccess(session);
-	}
+    }
 
-	@Override
-	protected void onAttach(AttachEvent attachEvent) {
-		super.onAttach(attachEvent);
-		LOG.info("attached");
-		refresh();
-	}
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        LOG.info("attached");
+        refresh();
+    }
 
-	private void refresh() {
-		removeAll();
-		getUI().ifPresent(ui -> ui.navigate(MainMenuView.URL));
-	}
+    private void refresh() {
+        removeAll();
+        getUI().ifPresent(ui -> ui.navigate(MainMenuView.URL));
+    }
 
-	@Override
-	protected void onDetach(DetachEvent detachEvent) {
-		super.onDetach(detachEvent);
-		LOG.info("detached");
-	}
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        LOG.info("detached");
+    }
 
 }
