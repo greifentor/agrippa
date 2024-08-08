@@ -14,6 +14,8 @@ import lombok.ToString;
 @RequiredArgsConstructor
 public class PersistenceFailureException extends RuntimeException {
 
+	static final String NO_ERROR_SUFFIX = "NO_ERROR_FOUND";
+
 	static final String GENERAL_RESOURCE_ID = "persistence.failure.general.label";
 	static final String NO_ERRORS_FOUND_RESOURCE_ID = "persistence.failure.noErrorsFound.label";
 	static final String NOT_BLANK_CONSTRAINT_VIOLATION_RESOURCE_ID =
@@ -58,8 +60,9 @@ public class PersistenceFailureException extends RuntimeException {
 	private final List<ValidationFailure> validationFailures;
 
 	public String getLocalizedMessage(ResourceManager resourceManager, LocalizationSO localization) {
+		String resourceIdPrefix = getClass().getSimpleName() + ".";
 		if (validationFailures.isEmpty()) {
-			return resourceManager.getLocalizedString(NO_ERRORS_FOUND_RESOURCE_ID, localization);
+			return resourceManager.getLocalizedString(resourceIdPrefix + NO_ERROR_SUFFIX + ".label", localization);
 		}
 		return validationFailures
 				.stream()
@@ -70,56 +73,19 @@ public class PersistenceFailureException extends RuntimeException {
 
 	private String toLocalizedString(ValidationFailure validationFailure, ResourceManager resourceManager,
 			LocalizationSO localization) {
-		if (validationFailure.getReason() == Reason.NOT_NULL) {
-			return resourceManager
-					.getLocalizedString(NOT_NULL_CONSTRAINT_VIOLATION_RESOURCE_ID, localization)
-					.replace("{0}", "" + getId())
-					.replace("{1}", validationFailure.getClassName())
-					.replace(
-							"{2}",
-							validationFailure
-									.getAttributeNames()
-									.stream()
-									.sorted((s0, s1) -> s0.compareTo(s1))
-									.reduce((s0, s1) -> s0 + ", " + s1)
-									.orElse("n/a"));
-		} else if (validationFailure.getReason() == Reason.NOT_BLANK) {
-			return resourceManager
-					.getLocalizedString(NOT_BLANK_CONSTRAINT_VIOLATION_RESOURCE_ID, localization)
-					.replace("{0}", "" + getId())
-					.replace("{1}", validationFailure.getClassName())
-					.replace(
-							"{2}",
-							validationFailure
-									.getAttributeNames()
-									.stream()
-									.sorted((s0, s1) -> s0.compareTo(s1))
-									.reduce((s0, s1) -> s0 + ", " + s1)
-									.orElse("n/a"));
-		} else if (validationFailure.getReason() == Reason.UNIQUE) {
-			return resourceManager
-					.getLocalizedString(UNIQUE_CONSTRAINT_VIOLATION_RESOURCE_ID, localization)
-					.replace("{0}", "" + getId())
-					.replace("{1}", validationFailure.getClassName())
-					.replace(
-							"{2}",
-							validationFailure
-									.getAttributeNames()
-									.stream()
-									.sorted((s0, s1) -> s0.compareTo(s1))
-									.reduce((s0, s1) -> s0 + ", " + s1)
-									.orElse("n/a"));
-
-		} else if (validationFailure.getReason() == Reason.VERSION) {
-			return resourceManager
-					.getLocalizedString(VERSION_VIOLATION_RESOURCE_ID, localization)
-					.replace("{0}", "" + getId())
-					.replace("{1}", validationFailure.getClassName());
-		}
+		String id = "PersistenceFailureException." + validationFailure.getReason().name() + ".label";
 		return resourceManager
-				.getLocalizedString(GENERAL_RESOURCE_ID, localization)
-				.replace("{0}", "" + getId())
-				.replace("{1}", validationFailure.getClassName());
+				.getLocalizedString(id, localization)
+				.replace("{id}", "" + getId())
+				.replace("{className}", validationFailure.getClassName())
+				.replace(
+						"{attributeNames}",
+						validationFailure
+								.getAttributeNames()
+								.stream()
+								.sorted((s0, s1) -> s0.compareTo(s1))
+								.reduce((s0, s1) -> s0 + ", " + s1)
+								.orElse("n/a"));
 	}
 
 }
