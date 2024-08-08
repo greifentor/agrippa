@@ -28,8 +28,7 @@ class PersistenceFailureExceptionTest {
 	private static final LocalizationSO LOCALIZATION = LocalizationSO.DE;
 	private static final Reason REASON = Reason.UNIQUE;
 	private static final String NO_ERRORS_FOUND = "no errors found";
-	private static final String NOT_BLANK_VIOLATION = "not blank {0} violation {1}";
-	private static final String NOT_NULL_VIOLATION = "not null {0} violation {1}";
+	private static final String NOT_BLANK_VIOLATION = "not blank {id} violation {className}";
 	private static final String UNIQUE_VIOLATION = "unique {0} violation {1}";
 	private static final String VERSION_VIOLATION = "version {0} violation";
 
@@ -65,11 +64,11 @@ class PersistenceFailureExceptionTest {
 
 		@Test
 		void returnsANotErrorsFoundMessage_passingAnExceptionWithNoValidationFailures() {
+			// Prepare
 			PersistenceFailureException underTest = new PersistenceFailureException(ID, List.of());
-			when(
-					resourceManager
-							.getLocalizedString(PersistenceFailureException.NO_ERRORS_FOUND_RESOURCE_ID, LOCALIZATION))
-									.thenReturn(NO_ERRORS_FOUND);
+			String id = "PersistenceFailureException." + PersistenceFailureException.NO_ERROR_SUFFIX + ".label";
+			when(resourceManager.getLocalizedString(id, LOCALIZATION)).thenReturn(NO_ERRORS_FOUND);
+			// Run & Check
 			assertEquals(NO_ERRORS_FOUND, underTest.getLocalizedMessage(resourceManager, LOCALIZATION));
 		}
 
@@ -78,14 +77,21 @@ class PersistenceFailureExceptionTest {
 			PersistenceFailureException underTest =
 					new PersistenceFailureException(
 							ID,
-							List.of(new ValidationFailure(Reason.NOT_NULL, CLASS_NAME, ATTRIBUTE_NAME_0)));
-			when(
-					resourceManager
-							.getLocalizedString(
-									PersistenceFailureException.NOT_NULL_CONSTRAINT_VIOLATION_RESOURCE_ID,
-									LOCALIZATION)).thenReturn(NOT_NULL_VIOLATION);
+							List
+									.of(
+											new ValidationFailure(
+													Reason.NOT_NULL,
+													CLASS_NAME,
+													ATTRIBUTE_NAME_0,
+													ATTRIBUTE_NAME_1)));
+			String id = "PersistenceFailureException." + Reason.NOT_NULL + ".label";
+			String resource = "{id} - {className} > {attributeNames}";
+			when(resourceManager.getLocalizedString(id, LOCALIZATION)).thenReturn(resource);
 			assertEquals(
-					NOT_NULL_VIOLATION.replace("{0}", ID).replace("{1}", CLASS_NAME).replace("{2}", ATTRIBUTE_NAMES),
+					resource
+							.replace("{id}", ID)
+							.replace("{className}", CLASS_NAME)
+							.replace("{attributeNames}", ATTRIBUTE_NAMES),
 					underTest.getLocalizedMessage(resourceManager, LOCALIZATION));
 		}
 
@@ -95,13 +101,13 @@ class PersistenceFailureExceptionTest {
 					new PersistenceFailureException(
 							ID,
 							List.of(new ValidationFailure(Reason.NOT_BLANK, CLASS_NAME, ATTRIBUTE_NAME_0)));
-			when(
-					resourceManager
-							.getLocalizedString(
-									PersistenceFailureException.NOT_BLANK_CONSTRAINT_VIOLATION_RESOURCE_ID,
-									LOCALIZATION)).thenReturn(NOT_BLANK_VIOLATION);
+			String id = "PersistenceFailureException." + Reason.NOT_BLANK + ".label";
+			when(resourceManager.getLocalizedString(id, LOCALIZATION)).thenReturn(NOT_BLANK_VIOLATION);
 			assertEquals(
-					NOT_BLANK_VIOLATION.replace("{0}", ID).replace("{1}", CLASS_NAME).replace("{2}", ATTRIBUTE_NAMES),
+					NOT_BLANK_VIOLATION
+							.replace("{id}", ID)
+							.replace("{className}", CLASS_NAME)
+							.replace("{attributeNames}", ATTRIBUTE_NAME_0),
 					underTest.getLocalizedMessage(resourceManager, LOCALIZATION));
 		}
 
@@ -117,13 +123,13 @@ class PersistenceFailureExceptionTest {
 													CLASS_NAME,
 													ATTRIBUTE_NAME_1,
 													ATTRIBUTE_NAME_0)));
-			when(
-					resourceManager
-							.getLocalizedString(
-									PersistenceFailureException.UNIQUE_CONSTRAINT_VIOLATION_RESOURCE_ID,
-									LOCALIZATION)).thenReturn(UNIQUE_VIOLATION);
+			String id = "PersistenceFailureException." + Reason.UNIQUE + ".label";
+			when(resourceManager.getLocalizedString(id, LOCALIZATION)).thenReturn(UNIQUE_VIOLATION);
 			assertEquals(
-					UNIQUE_VIOLATION.replace("{0}", ID).replace("{1}", CLASS_NAME).replace("{2}", ATTRIBUTE_NAMES),
+					UNIQUE_VIOLATION
+							.replace("{id}", ID)
+							.replace("{className}", CLASS_NAME)
+							.replace("{attributeNames}", ATTRIBUTE_NAMES),
 					underTest.getLocalizedMessage(resourceManager, LOCALIZATION));
 		}
 
@@ -131,13 +137,10 @@ class PersistenceFailureExceptionTest {
 		void returnsACorrectMessage_passingAnExceptionWithVersionViolation() {
 			PersistenceFailureException underTest =
 					new PersistenceFailureException(ID, List.of(new ValidationFailure(Reason.VERSION, CLASS_NAME)));
-			when(
-					resourceManager
-							.getLocalizedString(
-									PersistenceFailureException.VERSION_VIOLATION_RESOURCE_ID,
-									LOCALIZATION)).thenReturn(VERSION_VIOLATION);
+			String id = "PersistenceFailureException." + Reason.VERSION + ".label";
+			when(resourceManager.getLocalizedString(id, LOCALIZATION)).thenReturn(VERSION_VIOLATION);
 			assertEquals(
-					VERSION_VIOLATION.replace("{1}", CLASS_NAME).replace("{0}", ID),
+					VERSION_VIOLATION.replace("{id}", CLASS_NAME).replace("{className}", ID),
 					underTest.getLocalizedMessage(resourceManager, LOCALIZATION));
 		}
 
@@ -145,10 +148,10 @@ class PersistenceFailureExceptionTest {
 		void returnsACorrectMessage_passingAnExceptionWithGeneralProblem() {
 			PersistenceFailureException underTest =
 					new PersistenceFailureException(ID, List.of(new ValidationFailure(Reason.GENERAL, CLASS_NAME)));
-			when(resourceManager.getLocalizedString(PersistenceFailureException.GENERAL_RESOURCE_ID, LOCALIZATION))
-					.thenReturn(GENERAL);
+			String id = "PersistenceFailureException." + Reason.GENERAL + ".label";
+			when(resourceManager.getLocalizedString(id, LOCALIZATION)).thenReturn(GENERAL);
 			assertEquals(
-					GENERAL.replace("{1}", CLASS_NAME).replace("{0}", ID),
+					GENERAL.replace("{className}", CLASS_NAME).replace("{id}", ID),
 					underTest.getLocalizedMessage(resourceManager, LOCALIZATION));
 		}
 
