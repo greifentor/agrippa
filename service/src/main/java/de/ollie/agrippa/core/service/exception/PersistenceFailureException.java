@@ -6,9 +6,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.EqualsAndHashCode;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.ToString;
 
+/**
+ * An exception for persistence misbehavior.
+ *
+ * GENERATED CODE !!! DO NOT CHANGE !!!
+ */
+@Generated
 public class PersistenceFailureException extends ServiceException {
 
 	public enum Reason {
@@ -19,39 +26,44 @@ public class PersistenceFailureException extends ServiceException {
 		VERSION;
 	}
 
-    @EqualsAndHashCode(callSuper = true)
+	@EqualsAndHashCode(callSuper = true)
 	@Getter
 	@ToString
-    public static class PersistenceFailureValidationFailure extends ValidationFailure<Reason> {
+	public static class ValidationFailure extends ServiceException.ValidationFailure<Reason> {
 
-        private final List<String> attributeNames;
+		private final List<String> attributeNames;
 
-        public PersistenceFailureValidationFailure(Reason reason, String className, String... attributeNames) {
-            super(reason);
-            this.attributeNames = Arrays.asList(attributeNames);
-            getProperties().put("className", className);
-            getProperties().put("attributeNames",
-                    Arrays.asList(attributeNames).stream().sorted().reduce((s0, s1) -> s0 + ", " + s1).orElse("-"));
+		public ValidationFailure(Reason reason, String className, String... attributeNames) {
+			super(reason);
+			this.attributeNames = Arrays.asList(attributeNames);
+			getProperties().put("className", className);
+			getProperties()
+					.put(
+							"attributeNames",
+							Arrays
+									.asList(attributeNames)
+									.stream()
+									.sorted()
+									.reduce((s0, s1) -> s0 + ", " + s1)
+									.orElse("-"));
 		}
 
-        public String getClassName() {
-            return getProperties().get("className");
-        }
+		public String getClassName() {
+			return getProperties().get("className");
+		}
 
 	}
 
-    private final List<PersistenceFailureValidationFailure> validationFailures;
+	private final List<ValidationFailure> validationFailures;
 
-    public PersistenceFailureException(Long id, List<PersistenceFailureValidationFailure> validationFailures) {
-        super(Map.of("id", "" + id));
-        this.validationFailures = validationFailures;
-    }
+	public PersistenceFailureException(String id, List<ValidationFailure> validationFailures) {
+		super(Map.of("id", id));
+		this.validationFailures = validationFailures;
+	}
 
-    @Override
-    public List<ValidationFailure<? extends Enum<?>>> getValidationFailures() {
-        return validationFailures.stream()
-                .map(vf -> (PersistenceFailureValidationFailure) vf)
-                .collect(Collectors.toList());
-    }
+	@Override
+	public List<ServiceException.ValidationFailure<? extends Enum<?>>> getValidationFailures() {
+		return validationFailures.stream().map(vf -> vf).collect(Collectors.toList());
+	}
 
 }
