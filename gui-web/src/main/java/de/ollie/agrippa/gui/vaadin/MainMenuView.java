@@ -1,5 +1,7 @@
 package de.ollie.agrippa.gui.vaadin;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,6 +24,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -46,6 +49,8 @@ import de.ollie.agrippa.core.model.Team;
 import de.ollie.agrippa.core.model.Todo;
 import de.ollie.agrippa.core.model.TodoPriority;
 import de.ollie.agrippa.core.model.TodoStatus;
+import de.ollie.agrippa.core.service.CurrentDateService;
+import de.ollie.agrippa.core.service.CurrentDateTimeService;
 import de.ollie.agrippa.core.service.TaskService;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 import de.ollie.agrippa.gui.AccessGranter;
@@ -123,6 +128,8 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
     private final AccessGranter accessGranter;
     private final ButtonFactory buttonFactory;
     private final ComponentFactory componentFactory;
+    private final CurrentDateTimeService currentDateTimeService;
+    private final CurrentDateService currentDateService;
     private final GUIConfiguration guiConfiguration;
     private final MasterDataGUIConfiguration masterDataGUIConfiguration;
     private final ResourceManager resourceManager;
@@ -161,7 +168,11 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
                 resourceManager.getLocalizedString("main-menu.button.master-data.text", session.getLocalization()));
         buttonMasterData.addClickListener(event -> switchToMasterData());
         buttonMasterData.setWidthFull();
-        ButtonGrid buttonGridMasterData = new ButtonGrid(4, buttonMasterData);
+        Button buttonNewTask = buttonFactory.createButton(
+                resourceManager.getLocalizedString("main-menu.button.new-task.text", session.getLocalization()));
+        buttonNewTask.addClickListener(event -> newTask());
+        buttonNewTask.setWidthFull();
+        ButtonGrid buttonGridMasterData = new ButtonGrid(4, buttonMasterData, buttonNewTask);
         buttonGridMasterData.setMargin(false);
         buttonGridMasterData.setWidthFull();
         Component todoOverviewLayout = createTodoOverviewLayout();
@@ -205,15 +216,16 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
                 "18%",
                 null,
                 false);
-        taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 4, "18%");
+        taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 4, "15%");
         taskLinksColumn = addColumnWithComponent(grid,
                 ttd -> createLabel(getLinksAsHTML(ttd)),
                 5,
                 "10%",
                 (ttd0, ttd1) -> ttd0.getLinksString().compareTo(ttd1.getLinksString()),
                 true);
-        todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "25%");
-        addColumnWithComponent(grid, ttd -> createTaskButton(ttd), 7, "6%", null, false);
+        todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "20%");
+        addColumnWithComponent(grid, ttd -> createDueDateLabel(ttd), 7, "8%", null, false);
+        addColumnWithComponent(grid, ttd -> createTaskButton(ttd), 8, "6%", null, false);
         grid.setClassNameGenerator(ttd -> todoDueStatusCssClassService.getCssClassName(ttd.getTodo()));
         updateGrid();
         grid.setAllRowsVisible(true);
@@ -252,10 +264,26 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
         b.addClickListener(e -> {
             QueryParameters parameters = new QueryParameters(Map.of("id", List.of("" + ttd.getTask().getId())));
             session.addReturnUrl(MainMenuView.URL);
-            System.out.println("1:" + session);
             getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
         });
         return b;
+    }
+
+    private Component createDueDateLabel(TaskTodoData ttd) {
+        String s = "-";
+        if (ttd.getTodo().getDueDate() != null) {
+            if (isToday(ttd.getTodo().getDueDate())) {
+                s = ttd.getTodo().getDueDate().toString().substring(11);
+            } else {
+                s = ttd.getTodo().getDueDate().toString().replace("T", " ");
+            }
+        }
+        return new Span(s);
+    }
+
+    private boolean isToday(LocalDateTime d) {
+        LocalDate today = currentDateService.now();
+        return today.equals(LocalDate.of(d.getYear(), d.getMonthValue(), d.getDayOfMonth()));
     }
 
     private void updateGrid() {
@@ -335,6 +363,11 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 
     private void switchToMasterData() {
         getUI().ifPresent(ui -> ui.navigate(MasterDataView.URL));
+    }
+
+    private void newTask() {
+        session.addReturnUrl(URL);
+        getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL));
     }
 
     private Component createFilterHeader(Consumer<String> filterChangeConsumer, String id) {
