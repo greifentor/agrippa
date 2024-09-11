@@ -17,6 +17,7 @@ import lombok.experimental.Accessors;
 public abstract class GeneratedNote<T extends Note> {
 
 	public static final String ID = "ID";
+	public static final String RELATEDTODO = "RELATEDTODO";
 	public static final String CREATIONDATE = "CREATIONDATE";
 	public static final String DESCRIPTION = "DESCRIPTION";
 	public static final String TITLE = "TITLE";
@@ -24,6 +25,7 @@ public abstract class GeneratedNote<T extends Note> {
 	public static final String URL = "URL";
 
 	private long id;
+	private Todo relatedTodo;
 	private LocalDateTime creationDate = LocalDateTime.now();
 	private String description;
 	private String title;
@@ -34,6 +36,11 @@ public abstract class GeneratedNote<T extends Note> {
 
 	public T setId(long id) {
 		this.id = id;
+		return self();
+	}
+
+	public T setRelatedTodo(Todo relatedTodo) {
+		this.relatedTodo = relatedTodo;
 		return self();
 	}
 

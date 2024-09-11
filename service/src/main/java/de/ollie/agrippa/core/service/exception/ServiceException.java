@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * An exception for persistence misbehavior.
+ * An exception for service misbehavior.
  *
  * GENERATED CODE !!! DO NOT CHANGE !!!
  */

@@ -166,4 +166,10 @@
 			<column name="DUE_DATE" type="TIMESTAMP" />
 		</addColumn>
 	</changeSet>
+	<changeSet author="dm-comp" id="Add-Field-RELATED_TODO-to-Table-NOTE" runInTransaction="true" failOnError="true">
+		<addColumn tableName="NOTE">
+			<column name="RELATED_TODO" type="BIGINT" />
+		</addColumn>
+		<addForeignKeyConstraint baseColumnNames="RELATED_TODO" baseTableName="NOTE" constraintName="FK_NOTE_RELATED_TODO_TO_TODO" referencedColumnNames="ID" referencedTableName="TODO" />
+	</changeSet>
 </databaseChangeLog>

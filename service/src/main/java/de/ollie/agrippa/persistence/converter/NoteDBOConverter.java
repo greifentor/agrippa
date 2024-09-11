@@ -21,6 +21,7 @@ import de.ollie.agrippa.core.model.Note;
 @RequiredArgsConstructor
 public class NoteDBOConverter implements ToModelConverter<Note, NoteDBO> {
 
+	private final TodoDBOConverter todoDBOConverter;
 	private final NoteTypeDBOConverter noteTypeDBOConverter;
 
 	public NoteDBO toDBO(Note model) {
@@ -29,6 +30,7 @@ public class NoteDBOConverter implements ToModelConverter<Note, NoteDBO> {
 		}
 		return new NoteDBO()
 				.setId(model.getId())
+				.setRelatedTodo(todoDBOConverter.toDBO(model.getRelatedTodo()))
 				.setCreationDate(model.getCreationDate())
 				.setDescription(model.getDescription())
 				.setTitle(model.getTitle())
@@ -50,6 +52,7 @@ public class NoteDBOConverter implements ToModelConverter<Note, NoteDBO> {
 		}
 		return new Note()
 				.setId(dbo.getId())
+				.setRelatedTodo(todoDBOConverter.toModel(dbo.getRelatedTodo()))
 				.setCreationDate(dbo.getCreationDate())
 				.setDescription(dbo.getDescription())
 				.setTitle(dbo.getTitle())

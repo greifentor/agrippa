@@ -34,6 +34,9 @@ public class NoteDBO {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID", nullable = false)
 	private long id;
+	@JoinColumn(name = "RELATED_TODO", referencedColumnName = "ID")
+	@ManyToOne(fetch = FetchType.EAGER)
+	private TodoDBO relatedTodo;
 	@Column(name = "CREATION_DATE", nullable = false)
 	private LocalDateTime creationDate;
 	@Column(name = "DESCRIPTION")

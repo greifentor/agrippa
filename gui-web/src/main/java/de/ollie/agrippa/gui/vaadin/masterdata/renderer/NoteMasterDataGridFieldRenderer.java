@@ -26,6 +26,9 @@ public class NoteMasterDataGridFieldRenderer implements MasterDataGridFieldRende
 
 	@Override
 	public Object getHeaderString(String fieldName, Note model) {
+		if (Note.RELATEDTODO.equals(fieldName)) {
+			return model.getRelatedTodo() != null ? model.getRelatedTodo().getTitle() : "-";
+		}
 		if (Note.TYPE.equals(fieldName)) {
 			return componentFactory.getNoteTypeItemLabelGenerator().apply(model.getType());
 		}
@@ -34,6 +37,9 @@ public class NoteMasterDataGridFieldRenderer implements MasterDataGridFieldRende
 
 	@Override
 	public boolean hasRenderingFor(String fieldName) {
+		if (Note.RELATEDTODO.equals(fieldName)) {
+			return true;
+		}
 		if (Note.TYPE.equals(fieldName) && (componentFactory.getNoteTypeItemLabelGenerator() != null)) {
 			return true;
 		}
