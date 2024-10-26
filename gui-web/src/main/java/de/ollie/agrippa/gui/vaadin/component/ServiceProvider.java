@@ -4,7 +4,6 @@ import javax.inject.Named;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import de.ollie.agrippa.core.service.NoteService;
 import de.ollie.agrippa.core.service.ProjectService;
 import de.ollie.agrippa.core.service.TaskService;
 import de.ollie.agrippa.core.service.TeamService;
@@ -23,8 +22,6 @@ import lombok.Getter;
 @Named
 public class ServiceProvider {
 
-	@Autowired(required = false)
-	private NoteService noteService;
 	@Autowired(required = false)
 	private ProjectService projectService;
 	@Autowired(required = false)
