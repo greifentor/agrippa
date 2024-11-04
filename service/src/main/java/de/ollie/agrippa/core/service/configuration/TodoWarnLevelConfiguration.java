@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TodoWarnLevelConfiguration {
 
-	@Value("${warn.level1.offset.minutes:4320}") // 3 d
+    @Value("${warn.level1.offset.minutes:3360}") // 56 h
 	private int warnLevel1OffsetMinutes;
 
-	@Value("${warn.level2.offset.minutes:1440}") // 24 h
+    @Value("${warn.level2.offset.minutes:1920}") // 32 h
 	private int warnLevel2OffsetMinutes;
 
 	@Value("${warn.level3.offset.minutes:480}") // 8 h
