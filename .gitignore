@@ -25,3 +25,4 @@ replay_pid*
 /.project
 /pom.xml.versionsBackup
 /db-*
+start-nortal.bat

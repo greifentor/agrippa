@@ -221,7 +221,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 						grid,
 						ttd -> (ttd.getTask().getTeam() != null ? ttd.getTask().getTeam().getTitle() : "-"),
 						2,
-						"9%");
+						"8%");
 		projectTitleColumn =
 				addColumnWithComponent(
 						grid,
@@ -229,21 +229,22 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 								? createLabel(ttd.getTask().getProject().getTitle())
 								: createProjectButton(ttd),
 						3,
-						"18%",
+						"16%",
 						null,
 						false);
-		taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 4, "15%");
+		taskTitleColumn = addColumn(grid, ttd -> ttd.getTask().getTitle(), 4, "16%");
 		taskLinksColumn =
 				addColumnWithComponent(
 						grid,
 						ttd -> createLabel(getLinksAsHTML(ttd)),
 						5,
-						"10%",
+						"9%",
 						(ttd0, ttd1) -> ttd0.getLinksString().compareTo(ttd1.getLinksString()),
 						true);
-		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "18%");
-		addColumnWithComponent(grid, ttd -> createDueDateLabel(ttd), 7, "8%", null, false);
-		addColumnWithComponent(grid, ttd -> createTaskButton(ttd), 8, "8%", null, false);
+		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "15%");
+		addColumnWithComponent(grid, this::createDueDateLabel, 7, "8%", null, false);
+		addColumnWithComponent(grid, this::createTaskButton, 8, "6%", null, false);
+		addColumnWithComponent(grid, this::createReportButton, 9, "8%", null, false);
 		grid.setClassNameGenerator(ttd -> todoDueStatusCssClassService.getCssClassName(ttd.getTodo()));
 		updateGrid();
 		grid.setAllRowsVisible(true);
@@ -290,6 +291,16 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 			session.addReturnUrl(MainMenuView.URL);
 			getUI().ifPresent(ui -> ui.navigate(TaskMaintenanceView.URL, parameters));
 		});
+		return b;
+	}
+
+	private Button createReportButton(TaskTodoData ttd) {
+		Task task = ttd.getTask();
+		Button b = componentFactory.createButton(resourceManager.getLocalizedString(
+				"MainMenuView.gridTaskTodos.column.report.button.label", session.getLocalization()));
+		b.addClickListener(
+				e -> new TaskReportDialog(task, resourceManager, session.getLocalization(), dueDateFormatter));
+		b.setWidthFull();
 		return b;
 	}
 

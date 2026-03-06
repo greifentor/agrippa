@@ -1,1 +1,1 @@
-java -jar .\gui-web\target\agrippa-gui-1.2.1.jar
+java -jar .\gui-web\target\agrippa-gui-1.3.1.jar
