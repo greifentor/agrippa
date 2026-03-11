@@ -105,7 +105,7 @@ public class TaskReportDialog extends Dialog {
 						: "-")
 				+ ")</I>"));
 		if (note.getDescription() != null) {
-			panel.add(html(note.getDescription()));
+			panel.add(html(note.getDescription().replace("\n", "<BR>")));
 		}
 		if (note.getUrl() != null) {
 			panel.add(html("<A HREF=\"" + note.getUrl() + "\">" + note.getUrl() + "</A>"));
