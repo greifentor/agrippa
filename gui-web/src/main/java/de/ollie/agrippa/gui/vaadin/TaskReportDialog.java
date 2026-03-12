@@ -3,20 +3,17 @@ package de.ollie.agrippa.gui.vaadin;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.ollie.agrippa.core.model.Note;
-import de.ollie.agrippa.core.model.ProjectLink;
 import de.ollie.agrippa.core.model.Task;
 import de.ollie.agrippa.core.model.Todo;
+import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.model.localization.LocalizationSO;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
 
@@ -44,8 +41,7 @@ public class TaskReportDialog extends Dialog {
 		layout.add(html(task.getDescription().replace("\n", "<BR>")));
 		if (!task.getTodos().isEmpty()) {
 			layout.add(new Hr());
-			task.getTodos().stream().sorted((n0, n1) -> compareDate(n0.getDueDate(), n1.getDueDate()))
-					.forEach(t -> addTodo(t, task, layout));
+			task.getTodos().stream().sorted(this::compareTodo).forEach(t -> addTodo(t, task, layout));
 		}
 		if (hasNotesWithNoTodoContext(task)) {
 			layout.add(new Hr());
@@ -61,7 +57,9 @@ public class TaskReportDialog extends Dialog {
 
 	private void addTodo(Todo todo, Task task, VerticalLayout parent) {
 		VerticalLayout panel = new VerticalLayout();
-	panel.setClassName(todoDueStatusCssClassService.getCssClassName(todo));
+		if ((todo.getStatus() != TodoStatus.REJECTED) && (todo.getStatus() != TodoStatus.SOLVED)) {
+			panel.setClassName(todoDueStatusCssClassService.getCssClassName(todo));
+		}
 		panel.setSpacing(false);
 		panel.getStyle().set("border", "1px solid #ccc");
 		panel.getStyle().set("padding", "5px");
@@ -82,6 +80,18 @@ public class TaskReportDialog extends Dialog {
 		return task.getNotes().stream().filter(n -> n.getRelatedTodoId() == todo.getId()).count() > 0;
 	}
 	
+	private int compareTodo(Todo t0, Todo t1) {
+		int r = t0.getStatus().ordinal() - t1.getStatus().ordinal();
+		if (r == 0) {
+			r = compareDate(t0.getDueDate(), t1.getDueDate());
+		}
+		return r;
+	}
+
+	private int getStatusOrdinal(Todo t) {
+		return (t == null) || (t.getStatus() == null) ? Integer.MAX_VALUE : t.getStatus().ordinal();
+	}
+
 	private int compareDate(LocalDateTime d0, LocalDateTime d1) {
 		if ((d0 == null) && (d1 == null)) {
 			return 0;
@@ -136,35 +146,6 @@ public class TaskReportDialog extends Dialog {
 	
 	private boolean hasNotesWithNoTodoContext(Task task) {
 		return task.getNotes().stream().filter(n -> n.getRelatedTodoId() < 0).count() > 0;
-	}
-
-	private HorizontalLayout createLinkLayout(ProjectLink projectLink) {
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setWidthFull();
-		layout.setMargin(false);
-		layout.setPadding(false);
-		Span span = new Span(projectLink.getDescription());
-		span.setWidth("75%");
-		setMargin(span);
-		layout.add(createLabel(getLinksAsHTML(projectLink)));
-		layout.add(span);
-		return layout;
-	}
-
-	private void setMargin(HtmlComponent c) {
-		c.getStyle().set("margin", "10px 0px 10px");
-	}
-
-	private Component createLabel(String s) {
-		Label label = new Label();
-		label.getElement().setProperty("innerHTML", s);
-		label.setWidth("33%");
-		setMargin(label);
-		return label;
-	}
-
-	private String getLinksAsHTML(ProjectLink pl) {
-		return "<A HREF=\"" + pl.getUrl() + "\">" + pl.getTitle() + "</A>";
 	}
 
 }
