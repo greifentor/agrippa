@@ -111,7 +111,7 @@ public class TaskReportDialog extends Dialog {
 		panel.getStyle().set("border-radius", "6px");
 		panel.add(html(note.getTitle() + " <I>("
 				+ (note.getCreationDate() != null
-						? DateTimeFormatter.ofPattern("dd.MM.yyyy hh:mm").format(note.getCreationDate())
+						? DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").format(note.getCreationDate())
 						: "-")
 				+ ")</I>"));
 		if (note.getDescription() != null) {

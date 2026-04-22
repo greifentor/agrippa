@@ -63,7 +63,9 @@ import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
 import de.ollie.agrippa.gui.vaadin.component.TextField;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
 import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataView;
+import de.ollie.agrippa.gui.vaadin.masterdata.ProjectPageView;
 import de.ollie.agrippa.gui.vaadin.masterdata.TaskMaintenanceView;
+import de.ollie.agrippa.gui.vaadin.masterdata.TaskPageView;
 import de.ollie.agrippa.gui.vaadin.masterdata.dialog.TodoDetailsDialog;
 import lombok.AllArgsConstructor;
 import lombok.Generated;
@@ -180,7 +182,16 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 												session.getLocalization()));
 		buttonNewTask.addClickListener(event -> newTask());
 		buttonNewTask.setWidthFull();
-		ButtonGrid buttonGridMasterData = new ButtonGrid(4, buttonMasterData, buttonNewTask);
+		Button buttonMasterDataProject = buttonFactory.createButton(
+				resourceManager.getLocalizedString("master-data.button.project.text", session.getLocalization()));
+		buttonMasterDataProject.addClickListener(event -> switchToSourceProject());
+		buttonMasterDataProject.setWidthFull();
+		Button buttonMasterDataTask = buttonFactory.createButton(
+				resourceManager.getLocalizedString("master-data.button.task.text", session.getLocalization()));
+		buttonMasterDataTask.addClickListener(event -> switchToSourceTask());
+		buttonMasterDataTask.setWidthFull();
+		ButtonGrid buttonGridMasterData = new ButtonGrid(4, buttonMasterData, buttonNewTask, buttonMasterDataProject,
+				buttonMasterDataTask);
 		buttonGridMasterData.setMargin(false);
 		buttonGridMasterData.setWidthFull();
 		Component todoOverviewLayout = createTodoOverviewLayout();
@@ -197,6 +208,14 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 						todoOverviewLayout);
 		setContent(mainLayout);
 		LOG.info("main menu view opened for user '{}'.", session.getUserName());
+	}
+
+	private void switchToSourceProject() {
+		getUI().ifPresent(ui -> ui.navigate(ProjectPageView.URL));
+	}
+
+	private void switchToSourceTask() {
+		getUI().ifPresent(ui -> ui.navigate(TaskPageView.URL));
 	}
 
 	private Component createTodoOverviewLayout() {
