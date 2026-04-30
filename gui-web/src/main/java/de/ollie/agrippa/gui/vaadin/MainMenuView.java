@@ -23,6 +23,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -263,7 +264,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		todoTitleColumn = addColumn(grid, ttd -> ttd.getTodo().getTitle(), 6, "15%");
 		addColumnWithComponent(grid, this::createDueDateLabel, 7, "8%", null, false);
 		addColumnWithComponent(grid, this::createTaskButton, 8, "6%", null, false);
-		addColumnWithComponent(grid, this::createReportButton, 9, "8%", null, false);
+		addColumnWithComponent(grid, this::createReportButtons, 9, "8%", null, false);
 		grid.setClassNameGenerator(ttd -> todoDueStatusCssClassService.getCssClassName(ttd.getTodo()));
 		updateGrid();
 		grid.setAllRowsVisible(true);
@@ -313,14 +314,24 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		return b;
 	}
 
-	private Button createReportButton(TaskTodoData ttd) {
+	private Component createReportButtons(TaskTodoData ttd) {
 		Task task = ttd.getTask();
-		Button b = componentFactory.createButton(resourceManager.getLocalizedString(
-				"MainMenuView.gridTaskTodos.column.report.button.label", session.getLocalization()));
-		b.addClickListener(
-				e -> new TaskReportDialog(task, resourceManager, session.getLocalization(), dueDateFormatter, todoDueStatusCssClassService));
-		b.setWidthFull();
-		return b;
+		Button buttonReportTask = componentFactory.createButton(resourceManager.getLocalizedString(
+				"MainMenuView.gridTaskTodos.column.report.task.button.label", session.getLocalization()));
+		buttonReportTask.addClickListener(e -> new TaskReportDialog(task, resourceManager, session.getLocalization(),
+				dueDateFormatter, todoDueStatusCssClassService));
+		buttonReportTask.setWidthFull();
+		Button buttonReportTodo = componentFactory.createButton(resourceManager.getLocalizedString(
+				"MainMenuView.gridTaskTodos.column.report.todo.button.label", session.getLocalization()));
+		buttonReportTodo.addClickListener(
+				e -> new TodoReportDialog(ttd.getTodo(), task, resourceManager, session.getLocalization(),
+						dueDateFormatter,
+						todoDueStatusCssClassService));
+		buttonReportTodo.setWidthFull();
+		HorizontalLayout layout = new HorizontalLayout(buttonReportTodo, buttonReportTask);
+		layout.setMargin(false);
+		layout.setPadding(false);
+		return layout;
 	}
 
 	private Component createDueDateLabel(TaskTodoData ttd) {
