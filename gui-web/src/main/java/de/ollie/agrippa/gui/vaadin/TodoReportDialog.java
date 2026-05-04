@@ -3,11 +3,14 @@ package de.ollie.agrippa.gui.vaadin;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import de.ollie.agrippa.core.model.Note;
@@ -16,19 +19,41 @@ import de.ollie.agrippa.core.model.Todo;
 import de.ollie.agrippa.core.model.TodoStatus;
 import de.ollie.agrippa.core.model.localization.LocalizationSO;
 import de.ollie.agrippa.core.service.localization.ResourceManager;
+import de.ollie.agrippa.gui.SessionData;
+import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
+import de.ollie.agrippa.gui.vaadin.component.ServiceProvider;
+import de.ollie.agrippa.gui.vaadin.masterdata.MasterDataGUIConfiguration;
+import de.ollie.agrippa.gui.vaadin.masterdata.dialog.NoteDetailsDialog;
 
-public class TodoReportDialog extends Dialog {
+public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observer {
 
+	private final ComponentFactory componentFactory;
 	private final DueDateFormatter dueDateFormatter;
 	private final LocalizationSO localization;
+	private final MasterDataGUIConfiguration masterDataGUIConfiguration;
 	private final ResourceManager resourceManager;
+	private final ServiceProvider serviceProvider;
+	private final SessionData session;
+	private final Task task;
+	private final Todo todo;
 	private final TodoDueStatusCssClassService todoDueStatusCssClassService;
 
+	private VerticalLayout todoPanel;
+
 	public TodoReportDialog(Todo todo, Task task, ResourceManager resourceManager,
-			LocalizationSO localization, DueDateFormatter dueDateFormatter, TodoDueStatusCssClassService todoDueStatusCssClassService) {
+			LocalizationSO localization, ComponentFactory componentFactory,
+			MasterDataGUIConfiguration masterDataGUIConfiguration, SessionData session, ServiceProvider serviceProvider,
+			DueDateFormatter dueDateFormatter,
+			TodoDueStatusCssClassService todoDueStatusCssClassService) {
+		this.componentFactory = componentFactory;
 		this.dueDateFormatter = dueDateFormatter;
 		this.localization = localization;
+		this.masterDataGUIConfiguration = masterDataGUIConfiguration;
 		this.resourceManager = resourceManager;
+		this.serviceProvider = serviceProvider;
+		this.session = session;
+		this.task = task;
+		this.todo = todo;
 		this.todoDueStatusCssClassService = todoDueStatusCssClassService;
 		VerticalLayout layout = new VerticalLayout();
 		layout.setWidthFull();
@@ -39,35 +64,41 @@ public class TodoReportDialog extends Dialog {
 		layout.add(new Span("" + todo.getStatus()));
 		layout.add(new Hr());
 		layout.add(html(todo.getDescription().replace("\n", "<BR>")));
-		addTodo(todo, task, layout);
-		layout.add(html("<P>&nbsp;"));
+		addTodo(layout);
+		layout.add(addButtons());
 		add(layout);
 		setWidth("50%");
 		open();
 	}
 
-	private void addTodo(Todo todo, Task task, VerticalLayout parent) {
-		VerticalLayout panel = new VerticalLayout();
+	private void addTodo(VerticalLayout parent) {
+		if (todoPanel != null) {
+			todoPanel.removeAll();
+		} else {
+			todoPanel = new VerticalLayout();
+		}
 		if ((todo.getStatus() != TodoStatus.REJECTED) && (todo.getStatus() != TodoStatus.SOLVED)) {
-			panel.setClassName(todoDueStatusCssClassService.getCssClassName(todo));
+			todoPanel.setClassName(todoDueStatusCssClassService.getCssClassName(todo));
 		}
-		panel.setSpacing(false);
-		panel.getStyle().set("border", "1px solid #ccc");
-		panel.getStyle().set("padding", "5px");
-		panel.getStyle().set("border-radius", "6px");
-		panel.add(html("<B>" + todo.getTitle() + "</B><BR>"));
-		panel.add(html("<I>(" + getStatus(todo) + " - " + getPriority(todo) + " - "
-				+ getDueDate(todo) + "</I>)<BR>"));
-		panel.add(html(todo.getDescription() != null ? todo.getDescription().replace("\n", "<BR>") : "-"));
-		if(hasNotesForTodo(task, todo)) {
+		todoPanel.setSpacing(false);
+		todoPanel.getStyle().set("border", "1px solid #ccc");
+		todoPanel.getStyle().set("padding", "5px");
+		todoPanel.getStyle().set("border-radius", "6px");
+		todoPanel.add(html("<B>" + todo.getTitle() + "</B><BR>"));
+		todoPanel.add(html("<I>(" + getStatus() + " - " + getPriority() + " - " + getDueDate() + "</I>)<BR>"));
+		todoPanel.add(html(todo.getDescription() != null ? todo.getDescription().replace("\n", "<BR>") : "-"));
+		if (hasNotesForTodo()) {
 			task.getNotes().stream().filter(n -> n.getRelatedTodoId() == todo.getId())
-					.sorted((n0, n1) -> compareDate(n0.getCreationDate(), n1.getCreationDate())).forEach(t -> addNote(t, panel));
+					.sorted((n0, n1) -> compareDate(n0.getCreationDate(), n1.getCreationDate()))
+					.forEach(t -> addNote(t, todoPanel));
 		}
-		panel.add(html("<P>"));
-		parent.add(panel);
+		todoPanel.add(html("<P>"));
+		if (parent != null) {
+			parent.add(todoPanel);
+		}
 	}
 	
-	private boolean hasNotesForTodo(Task task, Todo todo) {
+	private boolean hasNotesForTodo() {
 		return task.getNotes().stream().filter(n -> n.getRelatedTodoId() == todo.getId()).count() > 0;
 	}
 	
@@ -108,23 +139,45 @@ public class TodoReportDialog extends Dialog {
 		return label;
 	}
 
-	private String getStatus(Todo todo) {
+	private String getStatus() {
 		return resourceManager.getLocalizedString("TaskReportDialog.status.label", localization)
 				+ " " + todo.getStatus();
 	}
 
-	private String getPriority(Todo todo) {
+	private String getPriority() {
 		return resourceManager.getLocalizedString("TaskReportDialog.priority.label", localization)
 				+ " " + todo.getPriority();
 	}
 
-	private String getDueDate(Todo todo) {
+	private String getDueDate() {
 		return resourceManager.getLocalizedString("TaskReportDialog.duedate.label", localization)
 				+ " " + (todo.getDueDate() != null ? dueDateFormatter.format(todo.getDueDate()) : "-");
 	}
-	
-	private boolean hasNotesWithNoTodoContext(Task task) {
-		return task.getNotes().stream().filter(n -> n.getRelatedTodoId() < 0).count() > 0;
+
+	private HorizontalLayout addButtons() {
+		HorizontalLayout layout = new HorizontalLayout();
+		layout.setWidthFull();
+		layout.setMargin(false);
+		layout.setPadding(false);
+		layout.setJustifyContentMode(JustifyContentMode.END);
+		Button buttonAddNote = componentFactory
+				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.add-note.label"));
+		buttonAddNote.addClickListener(e -> openNoteDialog());
+		layout.add(buttonAddNote);
+		return layout;
+	}
+
+	private void openNoteDialog() {
+		new NoteDetailsDialog(componentFactory, masterDataGUIConfiguration, this, session,
+				new Note().setRelatedTodo(todo), serviceProvider,
+				true, task).open();
+	}
+
+	@Override
+	public void changed(Note model, boolean newItem) {
+		task.getNotes().add(model);
+		serviceProvider.getTaskService().update(task);
+		addTodo(null);
 	}
 
 }

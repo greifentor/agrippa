@@ -325,6 +325,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 				"MainMenuView.gridTaskTodos.column.report.todo.button.label", session.getLocalization()));
 		buttonReportTodo.addClickListener(
 				e -> new TodoReportDialog(ttd.getTodo(), task, resourceManager, session.getLocalization(),
+						componentFactory, masterDataGUIConfiguration, session, serviceProvider,
 						dueDateFormatter,
 						todoDueStatusCssClassService));
 		buttonReportTodo.setWidthFull();
