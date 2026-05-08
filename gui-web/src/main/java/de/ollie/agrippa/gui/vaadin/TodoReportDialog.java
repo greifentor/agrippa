@@ -63,12 +63,16 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 		layout.add(new Hr());
 		layout.add(new Span("" + todo.getStatus()));
 		layout.add(new Hr());
-		layout.add(html(todo.getDescription().replace("\n", "<BR>")));
+		layout.add(html(getDescription(todo).replace("\n", "<BR>")));
 		addTodo(layout);
 		layout.add(addButtons());
 		add(layout);
 		setWidth("50%");
 		open();
+	}
+
+	private String getDescription(Todo todo) {
+		return (todo == null) || (todo.getDescription() == null) ? "" : todo.getDescription();
 	}
 
 	private void addTodo(VerticalLayout parent) {
@@ -163,7 +167,10 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 		Button buttonAddNote = componentFactory
 				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.add-note.label"));
 		buttonAddNote.addClickListener(e -> openNoteDialog());
-		layout.add(buttonAddNote);
+		Button buttonSolveTodo = componentFactory
+				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.solve-todo.label"));
+		buttonSolveTodo.addClickListener(e -> solveTodo());
+		layout.add(buttonSolveTodo, buttonAddNote);
 		return layout;
 	}
 
@@ -171,6 +178,10 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 		new NoteDetailsDialog(componentFactory, masterDataGUIConfiguration, this, session,
 				new Note().setRelatedTodo(todo), serviceProvider,
 				true, task).open();
+	}
+
+	private void solveTodo() {
+		System.out.println("DOES NOT WORK YET !!!");
 	}
 
 	@Override

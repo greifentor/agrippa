@@ -6,7 +6,6 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -35,22 +34,23 @@ public class ProjectLinksDialog extends Dialog {
         layout.setWidthFull();
         layout.setMargin(false);
         layout.setPadding(false);
-        Span span = new Span(projectLink.getDescription());
-        span.setWidth("67%");
-        setMargin(span);
-        layout.add(createLabel(getLinksAsHTML(projectLink)));
-        layout.add(span);
+		layout.add(createLabel(getLinksAsHTML(projectLink), "33%"));
+		layout.add(createLabel(getDescription(projectLink), "67%"));
         return layout;
     }
+
+	private String getDescription(ProjectLink projectLink) {
+		return (projectLink == null) || (projectLink.getDescription() == null) ? "" : projectLink.getDescription();
+	}
 
     private void setMargin(HtmlComponent c) {
         c.getStyle().set("margin", "10px 0px 10px");
     }
 
-    private Component createLabel(String s) {
+	private Component createLabel(String s, String width) {
         Label label = new Label();
         label.getElement().setProperty("innerHTML", s);
-        label.setWidth("33%");
+		label.setWidth(width);
         setMargin(label);
         return label;
     }
