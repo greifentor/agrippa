@@ -327,7 +327,7 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 				e -> new TodoReportDialog(ttd.getTodo(), task, resourceManager, session.getLocalization(),
 						componentFactory, masterDataGUIConfiguration, session, serviceProvider,
 						dueDateFormatter,
-						todoDueStatusCssClassService));
+						todoDueStatusCssClassService, changedTodo -> updateGrid()));
 		buttonReportTodo.setWidthFull();
 		HorizontalLayout layout = new HorizontalLayout(buttonReportTodo, buttonReportTask);
 		layout.setMargin(false);

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
@@ -27,11 +28,18 @@ import de.ollie.agrippa.gui.vaadin.masterdata.dialog.NoteDetailsDialog;
 
 public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observer {
 
+	public interface Observer {
+
+		void changed(Todo todo);
+
+	}
+
 	private final ComponentFactory componentFactory;
 	private final DueDateFormatter dueDateFormatter;
 	private final LocalizationSO localization;
 	private final MasterDataGUIConfiguration masterDataGUIConfiguration;
 	private final ResourceManager resourceManager;
+	private final Observer observer;
 	private final ServiceProvider serviceProvider;
 	private final SessionData session;
 	private final Task task;
@@ -44,11 +52,12 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 			LocalizationSO localization, ComponentFactory componentFactory,
 			MasterDataGUIConfiguration masterDataGUIConfiguration, SessionData session, ServiceProvider serviceProvider,
 			DueDateFormatter dueDateFormatter,
-			TodoDueStatusCssClassService todoDueStatusCssClassService) {
+			TodoDueStatusCssClassService todoDueStatusCssClassService, Observer observer) {
 		this.componentFactory = componentFactory;
 		this.dueDateFormatter = dueDateFormatter;
 		this.localization = localization;
 		this.masterDataGUIConfiguration = masterDataGUIConfiguration;
+		this.observer = observer;
 		this.resourceManager = resourceManager;
 		this.serviceProvider = serviceProvider;
 		this.session = session;
@@ -158,19 +167,29 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 				+ " " + (todo.getDueDate() != null ? dueDateFormatter.format(todo.getDueDate()) : "-");
 	}
 
-	private HorizontalLayout addButtons() {
-		HorizontalLayout layout = new HorizontalLayout();
-		layout.setWidthFull();
-		layout.setMargin(false);
-		layout.setPadding(false);
-		layout.setJustifyContentMode(JustifyContentMode.END);
+	private VerticalLayout addButtons() {
+		DateTimePicker dateTimePickerDueDate = componentFactory.createDateTimePicker(
+				"TodoReportDialog.field.duedate.label", localization, todo.getDueDate(), e -> {});
+		Button buttonChangeDueDate = componentFactory
+				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.change-duedate.label"));
+		buttonChangeDueDate.addClickListener(e -> changeDueDate(dateTimePickerDueDate.getValue()));
 		Button buttonAddNote = componentFactory
 				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.add-note.label"));
 		buttonAddNote.addClickListener(e -> openNoteDialog());
 		Button buttonSolveTodo = componentFactory
 				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.solve-todo.label"));
 		buttonSolveTodo.addClickListener(e -> solveTodo());
-		layout.add(buttonSolveTodo, buttonAddNote);
+		HorizontalLayout buttonLayout = new HorizontalLayout();
+		buttonLayout.setWidthFull();
+		buttonLayout.setMargin(false);
+		buttonLayout.setPadding(false);
+		buttonLayout.setJustifyContentMode(JustifyContentMode.END);
+		buttonLayout.add(buttonChangeDueDate, buttonSolveTodo, buttonAddNote);
+		VerticalLayout layout = new VerticalLayout();
+		layout.setWidthFull();
+		layout.setMargin(false);
+		layout.setPadding(false);
+		layout.add(dateTimePickerDueDate, buttonLayout);
 		return layout;
 	}
 
@@ -180,8 +199,22 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 				true, task).open();
 	}
 
+	private void changeDueDate(LocalDateTime dueDate) {
+		todo.setDueDate(dueDate);
+		serviceProvider.getTaskService().update(task);
+		if (observer != null) {
+			observer.changed(todo);
+		}
+		close();
+	}
+
 	private void solveTodo() {
-		System.out.println("DOES NOT WORK YET !!!");
+		todo.setStatus(TodoStatus.SOLVED);
+		serviceProvider.getTaskService().update(task);
+		if (observer != null) {
+			observer.changed(todo);
+		}
+		close();
 	}
 
 	@Override
