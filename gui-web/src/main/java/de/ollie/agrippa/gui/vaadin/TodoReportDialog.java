@@ -143,7 +143,21 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 		if (note.getUrl() != null) {
 			panel.add(html("<A HREF=\"" + note.getUrl() + "\">" + note.getUrl() + "</A>"));
 		}
+		panel.add(componentFactory.createEditButton(e -> editNote(note), session));
 		parent.add(panel);
+	}
+
+	private void editNote(Note note) {
+		new NoteDetailsDialog(componentFactory, masterDataGUIConfiguration, (toEdit, newItem) -> {
+			note.setTitle(toEdit.getTitle());
+			note.setCreationDate(toEdit.getCreationDate());
+			note.setUrl(toEdit.getUrl());
+			note.setType(toEdit.getType());
+			note.setRelatedTodo(toEdit.getRelatedTodo());
+			note.setDescription(toEdit.getDescription());
+			serviceProvider.getTaskService().update(task);
+			addTodo(null);
+		}, session, note, serviceProvider, false, task).open();
 	}
 
 	private Label html(String s) {
@@ -170,9 +184,10 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 	private VerticalLayout addButtons() {
 		DateTimePicker dateTimePickerDueDate = componentFactory.createDateTimePicker(
 				"TodoReportDialog.field.duedate.label", localization, todo.getDueDate(), e -> {});
-		Button buttonChangeDueDate = componentFactory
-				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.change-duedate.label"));
-		buttonChangeDueDate.addClickListener(e -> changeDueDate(dateTimePickerDueDate.getValue()));
+		Button buttonSave = componentFactory
+				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.save.label"));
+		buttonSave.addClickListener(e -> saveDueDate(dateTimePickerDueDate.getValue()));
+		buttonSave.getStyle().set("margin-left", "2em");
 		Button buttonAddNote = componentFactory
 				.createButton(resourceManager.getLocalizedString("TodoReportDialog.buttons.add-note.label"));
 		buttonAddNote.addClickListener(e -> openNoteDialog());
@@ -184,7 +199,7 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 		buttonLayout.setMargin(false);
 		buttonLayout.setPadding(false);
 		buttonLayout.setJustifyContentMode(JustifyContentMode.END);
-		buttonLayout.add(buttonChangeDueDate, buttonSolveTodo, buttonAddNote);
+		buttonLayout.add(buttonSolveTodo, buttonAddNote, buttonSave);
 		VerticalLayout layout = new VerticalLayout();
 		layout.setWidthFull();
 		layout.setMargin(false);
@@ -199,7 +214,7 @@ public class TodoReportDialog extends Dialog implements NoteDetailsDialog.Observ
 				true, task).open();
 	}
 
-	private void changeDueDate(LocalDateTime dueDate) {
+	private void saveDueDate(LocalDateTime dueDate) {
 		todo.setDueDate(dueDate);
 		serviceProvider.getTaskService().update(task);
 		if (observer != null) {
