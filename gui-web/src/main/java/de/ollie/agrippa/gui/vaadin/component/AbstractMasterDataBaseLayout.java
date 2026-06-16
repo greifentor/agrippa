@@ -111,6 +111,7 @@ public abstract class AbstractMasterDataBaseLayout extends Scroller implements B
 			ItemLabelGenerator<T> itemLabelGenerator) {
 		ComboBox<T> comboBox =
 				new ComboBox<>(getResourceManager().getLocalizedString(resourceId, getSessionData().getLocalization()));
+		ComponentFactory.sortByTitleIfEntity(valuesToSelect);
 		comboBox.setItems(valuesToSelect);
 		comboBox.setValue(fieldContent);
 		comboBox.setWidthFull();

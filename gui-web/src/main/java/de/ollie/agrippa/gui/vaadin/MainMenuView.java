@@ -371,7 +371,13 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 								filter::setProject,
 								GRID_PREFERENCE_ID_PROJECT,
 								p -> p != null ? p.getTitle() : "",
-								serviceProvider.getProjectService().findAll()));
+								serviceProvider
+										.getProjectService()
+										.findAll()
+										.stream()
+										.sorted(Comparator
+												.comparing(Project::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+										.collect(Collectors.toList())));
 		headerRow
 				.getCell(teamColumn)
 				.setComponent(
@@ -379,7 +385,13 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 								filter::setTeam,
 								GRID_PREFERENCE_ID_TEAM,
 								t -> t != null ? t.getTitle() : "",
-								serviceProvider.getTeamService().findAll()));
+								serviceProvider
+										.getTeamService()
+										.findAll()
+										.stream()
+										.sorted(Comparator
+												.comparing(Team::getTitle, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+										.collect(Collectors.toList())));
 		headerRow
 				.getCell(taskTitleColumn)
 				.setComponent(createFilterHeader(filter::setTaskTitle, GRID_PREFERENCE_ID_TITLE));

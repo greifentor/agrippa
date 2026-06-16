@@ -1,9 +1,13 @@
 package de.ollie.agrippa.gui.vaadin.component;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.inject.Named;
 
@@ -178,6 +182,7 @@ public class ComponentFactory {
 			ItemLabelGenerator<T> itemLabelGenerator, SessionData sessionData) {
 		ComboBox<T> comboBox =
 				new ComboBox<>(resourceManager.getLocalizedString(resourceId, sessionData.getLocalization()));
+		sortByTitleIfEntity(valuesToSelect);
 		comboBox.setItems(valuesToSelect);
 		comboBox.setValue(fieldContent);
 		comboBox.setWidthFull();
@@ -185,6 +190,63 @@ public class ComponentFactory {
 			comboBox.setItemLabelGenerator(itemLabelGenerator);
 		}
 		return comboBox;
+	}
+
+	/**
+	 * Sorts the given selection values alphabetically by their title, but only for the entity types Project, Task,
+	 * Todo and Team. Values of any other type (e.g. enums like TaskStatus or TodoStatus) keep their original order.
+	 */
+	static <T> void sortByTitleIfEntity(T[] valuesToSelect) {
+		if ((valuesToSelect == null) || (valuesToSelect.length < 2)) {
+			return;
+		}
+		Comparator<T> comparator = titleComparator(valuesToSelect[0]);
+		if (comparator != null) {
+			Arrays.sort(valuesToSelect, comparator);
+		}
+	}
+
+	/**
+	 * Returns the given values sorted alphabetically by their title, but only for the entity types Project, Task, Todo,
+	 * Team, Note and ProjectLink. Values of any other type keep their original order (the same list is returned). The
+	 * input list is never modified; a sorted copy is returned when sorting applies.
+	 */
+	public static <T> List<T> sortedByTitleIfEntity(List<T> values) {
+		if ((values == null) || (values.size() < 2)) {
+			return values;
+		}
+		Comparator<T> comparator = titleComparator(values.get(0));
+		if (comparator == null) {
+			return values;
+		}
+		return values.stream().sorted(comparator).collect(Collectors.toList());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> Comparator<T> titleComparator(T sample) {
+		if (sample instanceof Project) {
+			return (Comparator<T>) Comparator.comparing(Project::getTitle, nullSafeTitleOrder());
+		}
+		if (sample instanceof Task) {
+			return (Comparator<T>) Comparator.comparing(Task::getTitle, nullSafeTitleOrder());
+		}
+		if (sample instanceof Todo) {
+			return (Comparator<T>) Comparator.comparing(Todo::getTitle, nullSafeTitleOrder());
+		}
+		if (sample instanceof Team) {
+			return (Comparator<T>) Comparator.comparing(Team::getTitle, nullSafeTitleOrder());
+		}
+		if (sample instanceof Note) {
+			return (Comparator<T>) Comparator.comparing(Note::getTitle, nullSafeTitleOrder());
+		}
+		if (sample instanceof ProjectLink) {
+			return (Comparator<T>) Comparator.comparing(ProjectLink::getTitle, nullSafeTitleOrder());
+		}
+		return null;
+	}
+
+	private static Comparator<String> nullSafeTitleOrder() {
+		return Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER);
 	}
 
 	public IntegerField createIntegerField(String resourceId, Integer fieldContent, Integer min, Integer max,

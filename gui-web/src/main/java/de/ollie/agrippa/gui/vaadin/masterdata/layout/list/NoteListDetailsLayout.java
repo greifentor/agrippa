@@ -1,7 +1,6 @@
 package de.ollie.agrippa.gui.vaadin.masterdata.layout.list;
 
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
@@ -93,11 +92,7 @@ public class NoteListDetailsLayout extends VerticalLayout {
                 .setHeader(resourceManager.getLocalizedString("NoteListDetailsLayout.grid.header.description.label",
                         session.getLocalization()))
                 .setSortable(true);
-        if (!model.getNotes().isEmpty() && (model.getNotes().get(0) instanceof Comparable)) {
-            grid.setItems(model.getNotes().stream().sorted().collect(Collectors.toList()));
-        } else {
-            grid.setItems(model.getNotes());
-        }
+        grid.setItems(ComponentFactory.sortedByTitleIfEntity(model.getNotes()));
         grid.setWidthFull();
         setMargin(false);
         setPadding(false);

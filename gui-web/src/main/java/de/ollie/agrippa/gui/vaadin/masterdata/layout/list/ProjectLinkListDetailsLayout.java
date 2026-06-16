@@ -1,7 +1,6 @@
 package de.ollie.agrippa.gui.vaadin.masterdata.layout.list;
 
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -94,11 +93,7 @@ public class ProjectLinkListDetailsLayout extends VerticalLayout {
 										"ProjectLinkListDetailsLayout.grid.header.description.label",
 										session.getLocalization()))
 				.setSortable(true);
-		if (!model.getProjectLinks().isEmpty() && (model.getProjectLinks().get(0) instanceof Comparable)) {
-			grid.setItems(model.getProjectLinks().stream().sorted().collect(Collectors.toList()));
-		} else {
-			grid.setItems(model.getProjectLinks());
-		}
+		grid.setItems(ComponentFactory.sortedByTitleIfEntity(model.getProjectLinks()));
 		grid.setWidthFull();
 		setMargin(false);
 		setPadding(false);

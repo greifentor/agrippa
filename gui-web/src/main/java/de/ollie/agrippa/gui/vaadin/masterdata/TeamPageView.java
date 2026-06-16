@@ -35,6 +35,7 @@ import de.ollie.agrippa.gui.SessionData;
 import de.ollie.agrippa.gui.vaadin.UserAuthorizationChecker;
 import de.ollie.agrippa.gui.vaadin.component.Button;
 import de.ollie.agrippa.gui.vaadin.component.ButtonFactory;
+import de.ollie.agrippa.gui.vaadin.component.ComponentFactory;
 import de.ollie.agrippa.gui.vaadin.component.HeaderLayout;
 import de.ollie.agrippa.gui.vaadin.component.HeaderLayout.HeaderLayoutMode;
 import de.ollie.agrippa.gui.vaadin.component.MasterDataButtonLayout;
@@ -212,12 +213,16 @@ public class TeamPageView extends Scroller implements BeforeEnterObserver, HasUr
 	private void updateGrid(int pageNumber) {
 		grid
 				.setItems(
-						service
-								.findAll(new PageParameters().setEntriesPerPage(Integer.MAX_VALUE).setPageNumber(pageNumber))
-								.getEntries()
-								.stream()
-								.filter(this::isMatching)
-								.collect(Collectors.toList()));
+						ComponentFactory
+								.sortedByTitleIfEntity(
+										service
+												.findAll(new PageParameters()
+														.setEntriesPerPage(Integer.MAX_VALUE)
+														.setPageNumber(pageNumber))
+												.getEntries()
+												.stream()
+												.filter(this::isMatching)
+												.collect(Collectors.toList())));
 	}
 
 	private boolean isMatching(Team model) {

@@ -1,7 +1,6 @@
 package de.ollie.agrippa.gui.vaadin.masterdata.layout.list;
 
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -114,11 +113,7 @@ public class TodoListDetailsLayout extends VerticalLayout {
 										"TodoListDetailsLayout.grid.header.duedate.label",
 										session.getLocalization()))
 				.setSortable(true);
-		if (!model.getTodos().isEmpty() && (model.getTodos().get(0) instanceof Comparable)) {
-			grid.setItems(model.getTodos().stream().sorted().collect(Collectors.toList()));
-		} else {
-			grid.setItems(model.getTodos());
-		}
+		grid.setItems(ComponentFactory.sortedByTitleIfEntity(model.getTodos()));
 		grid.setWidthFull();
 		setMargin(false);
 		setPadding(false);
