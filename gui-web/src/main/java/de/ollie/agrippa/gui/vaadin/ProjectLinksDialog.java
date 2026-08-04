@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -23,7 +24,14 @@ public class ProjectLinksDialog extends Dialog {
         layout.setPadding(false);
         add(new H3(resourceManager.getLocalizedString("ProjectLinksDialog.header.label", localization)));
         add(new Hr());
-        project.getProjectLinks().forEach(pl -> add(createLinkLayout(pl)));
+		if (hasDescription(project)) {
+			add(new H4(resourceManager.getLocalizedString("ProjectLinksDialog.description.header.label", localization)));
+			add(createLabel(project.getDescription().replace("\n", "<BR>"), "100%"));
+		}
+		if (!project.getProjectLinks().isEmpty()) {
+			add(new H4(resourceManager.getLocalizedString("ProjectLinksDialog.links.header.label", localization)));
+			project.getProjectLinks().forEach(pl -> add(createLinkLayout(pl)));
+		}
         add(layout);
         setWidth("50%");
         open();
@@ -38,6 +46,10 @@ public class ProjectLinksDialog extends Dialog {
 		layout.add(createLabel(getDescription(projectLink), "67%"));
         return layout;
     }
+
+	private boolean hasDescription(Project project) {
+		return (project.getDescription() != null) && !project.getDescription().isBlank();
+	}
 
 	private String getDescription(ProjectLink projectLink) {
 		return (projectLink == null) || (projectLink.getDescription() == null) ? "" : projectLink.getDescription();

@@ -245,9 +245,9 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		projectTitleColumn =
 				addColumnWithComponent(
 						grid,
-						ttd -> ttd.getTask().getProject().getProjectLinks().isEmpty()
-								? createLabel(ttd.getTask().getProject().getTitle())
-								: createProjectButton(ttd),
+						ttd -> hasLinksOrDescription(ttd.getTask().getProject())
+								? createProjectButton(ttd)
+								: createLabel(ttd.getTask().getProject().getTitle()),
 						3,
 						"16%",
 						null,
@@ -288,6 +288,11 @@ public class MainMenuView extends Scroller implements BeforeEnterObserver, HasUr
 		Label label = new Label();
 		label.getElement().setProperty("innerHTML", s);
 		return label;
+	}
+
+	private boolean hasLinksOrDescription(Project project) {
+		return !project.getProjectLinks().isEmpty()
+				|| ((project.getDescription() != null) && !project.getDescription().isBlank());
 	}
 
 	private Button createProjectButton(TaskTodoData ttd) {
